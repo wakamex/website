@@ -35,6 +35,7 @@
     <img id="var_chart" alt="VAR Comparison">
 
     <h2>VAR History</h2>
+    <img id="history_chart" alt="VAR History">
     <div id="history"></div>
 
     <h2>Price vs Performance</h2>
@@ -51,6 +52,7 @@
 
         document.getElementById('clusters').src = `${CDN}/clusters.png`;
         document.getElementById('var_chart').src = `${CDN}/var_comparison.png`;
+        document.getElementById('history_chart').src = `${CDN}/history.png`;
 
         fetch(`${CDN}/data.json`)
             .then(r => r.json())

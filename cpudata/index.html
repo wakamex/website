@@ -29,6 +29,14 @@
     <h2>Brand Summary</h2>
     <div id="brands"></div>
 
+    <h2>Value Above Replacement (VAR)</h2>
+    <p>Area between each brand's efficient frontier and the market regression line. Higher = more value delivered across the price range.</p>
+    <div id="var"></div>
+    <img id="var_chart" alt="VAR Comparison">
+
+    <h2>VAR History</h2>
+    <div id="history"></div>
+
     <h2>Price vs Performance</h2>
     <p>CPUs clustered by price/performance. The white line shows the efficient frontier — Pareto-optimal CPUs where you can't get better performance without paying more.</p>
     <img id="clusters" alt="CPU Clusters">
@@ -42,6 +50,7 @@
         const CDN = 'https://cdn.jsdelivr.net/gh/wakamex/cpudata@main/docs';
 
         document.getElementById('clusters').src = `${CDN}/clusters.png`;
+        document.getElementById('var_chart').src = `${CDN}/var_comparison.png`;
 
         fetch(`${CDN}/data.json`)
             .then(r => r.json())
@@ -63,6 +72,31 @@
                 });
                 html += '</table>';
                 document.getElementById('brands').innerHTML = html;
+
+                // VAR comparison
+                if (data.var) {
+                    const amd = data.var.AMD || 0;
+                    const intel = data.var.Intel || 0;
+                    const leader = intel > amd ? 'Intel' : 'AMD';
+                    const pct = ((Math.max(intel, amd) / Math.min(intel, amd) - 1) * 100).toFixed(0);
+                    html = `<table><tr><th>Brand</th><th>VAR</th></tr>`;
+                    html += `<tr><td>AMD</td><td>${Math.round(amd).toLocaleString()}</td></tr>`;
+                    html += `<tr><td>Intel</td><td>${Math.round(intel).toLocaleString()}</td></tr>`;
+                    html += `</table>`;
+                    html += `<p><strong>${leader}</strong> leads by ${pct}%</p>`;
+                    document.getElementById('var').innerHTML = html;
+                }
+
+                // History table
+                if (data.history && data.history.length > 0) {
+                    html = '<table><tr><th>Date</th><th>AMD VAR</th><th>Intel VAR</th><th>Leader</th></tr>';
+                    data.history.slice().reverse().forEach(h => {
+                        const leader = h.intel_var > h.amd_var ? 'Intel' : 'AMD';
+                        html += `<tr><td>${h.date}</td><td>${Math.round(h.amd_var).toLocaleString()}</td><td>${Math.round(h.intel_var).toLocaleString()}</td><td>${leader}</td></tr>`;
+                    });
+                    html += '</table>';
+                    document.getElementById('history').innerHTML = html;
+                }
             })
             .catch(err => {
                 document.getElementById('top10').innerHTML = '<p class="error">Failed to load data. Try refreshing.</p>';

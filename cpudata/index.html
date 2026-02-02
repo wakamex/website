@@ -29,9 +29,6 @@
     <h2>Brand Summary</h2>
     <div id="brands"></div>
 
-    <h2>Price Distribution</h2>
-    <img id="histogram" alt="Price Histogram">
-
     <h2>Price vs Performance</h2>
     <p>CPUs clustered by price/performance. The white line shows the efficient frontier — Pareto-optimal CPUs where you can't get better performance without paying more.</p>
     <img id="clusters" alt="CPU Clusters">
@@ -44,7 +41,6 @@
     <script>
         const CDN = 'https://cdn.jsdelivr.net/gh/wakamex/cpudata@main/docs';
 
-        document.getElementById('histogram').src = `${CDN}/price_histogram.png`;
         document.getElementById('clusters').src = `${CDN}/clusters.png`;
 
         fetch(`${CDN}/data.json`)

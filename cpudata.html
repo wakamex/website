@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CPU Price/Performance - Mihai Cosma</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        body { max-width: 900px; }
+        table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.9em; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f5f5f5; }
+        tr:hover { background: #f9f9f9; }
+        .updated { color: #888; font-size: 0.85em; }
+        img { max-width: 100%; height: auto; margin: 16px 0; border-radius: 4px; }
+        .back { margin-bottom: 20px; }
+        .loading { color: #888; font-style: italic; }
+        .error { color: #c00; }
+    </style>
+</head>
+<body>
+    <p class="back"><a href="/">&larr; Back</a></p>
+    <h1>CPU Price/Performance</h1>
+    <p class="updated">Last updated: <span id="updated">loading...</span></p>
+
+    <h2>Top 10 Best Value CPUs</h2>
+    <div id="top10" class="loading">Loading data...</div>
+
+    <h2>Brand Summary</h2>
+    <div id="brands"></div>
+
+    <h2>Price Distribution</h2>
+    <img id="histogram" alt="Price Histogram">
+
+    <h2>Price vs Performance</h2>
+    <p>CPUs clustered by price/performance. The white line shows the efficient frontier — Pareto-optimal CPUs where you can't get better performance without paying more.</p>
+    <img id="clusters" alt="CPU Clusters">
+
+    <p style="margin-top: 32px; font-size: 0.85em; color: #888;">
+        Data source: <a href="https://www.cpubenchmark.net/desktop.html">PassMark CPU Benchmark</a> |
+        <a href="https://github.com/wakamex/cpudata">Source code</a>
+    </p>
+
+    <script>
+        const CDN = 'https://cdn.jsdelivr.net/gh/wakamex/cpudata@main/docs';
+
+        document.getElementById('histogram').src = `${CDN}/price_histogram.png`;
+        document.getElementById('clusters').src = `${CDN}/clusters.png`;
+
+        fetch(`${CDN}/data.json`)
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('updated').textContent = data.updated;
+
+                // Top 10 table
+                let html = '<table><tr><th>Brand</th><th>Model</th><th>Score</th><th>Price</th><th>Value</th></tr>';
+                data.top10.forEach(cpu => {
+                    html += `<tr><td>${cpu.brand}</td><td>${cpu.model}</td><td>${cpu.score.toLocaleString()}</td><td>$${Math.round(cpu.price)}</td><td>${cpu.value.toFixed(1)}</td></tr>`;
+                });
+                html += '</table>';
+                document.getElementById('top10').innerHTML = html;
+
+                // Brands table
+                html = '<table><tr><th>Brand</th><th>Count</th><th>Avg Score</th><th>Avg Price</th><th>Avg Value</th></tr>';
+                data.brands.forEach(b => {
+                    html += `<tr><td>${b.brand}</td><td>${b.count}</td><td>${Math.round(b.score).toLocaleString()}</td><td>$${Math.round(b.price)}</td><td>${b.value.toFixed(1)}</td></tr>`;
+                });
+                html += '</table>';
+                document.getElementById('brands').innerHTML = html;
+            })
+            .catch(err => {
+                document.getElementById('top10').innerHTML = '<p class="error">Failed to load data. Try refreshing.</p>';
+                console.error(err);
+            });
+    </script>
+</body>
+</html>

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mihai Cosma — Resume</title>
+    <style>
+        @font-face {
+            font-family: "D2Coding";
+            src: url("./D2CodingLigature.ttf") format("truetype");
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:        #040506;
+            --border:    #8a7d6a;
+            --text:      #e0e0e0;
+            --muted:     #b6aa99;
+            --accent:    #ff9800;
+            --font-mono: "D2Coding", "Courier New", monospace;
+            --font-body: system-ui, -apple-system, sans-serif;
+        }
+
+        html, body {
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        body {
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        /* ── Header ── */
+        .header {
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            font-family: var(--font-mono);
+            font-size: 1.6rem;
+            letter-spacing: 0.06em;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .contact {
+            font-size: 0.9rem;
+            color: var(--muted);
+            margin-bottom: 12px;
+        }
+
+        .contact a { color: var(--muted); text-decoration: none; }
+        .contact a:hover { color: var(--accent); }
+
+        .taglines {
+            font-size: 0.9rem;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        /* ── Divider ── */
+        .rule {
+            font-family: var(--font-mono);
+            color: var(--border);
+            margin: 20px 0;
+            overflow: hidden;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        /* ── Section ── */
+        .section { margin-bottom: 24px; }
+
+        .section-header {
+            font-family: var(--font-mono);
+            font-size: 0.88rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 10px;
+        }
+
+        /* ── Highlights ── */
+        .highlights { list-style: none; }
+
+        .highlights li {
+            padding: 5px 0 5px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 0.9rem;
+            position: relative;
+        }
+
+        .highlights li:first-child { border-top: 1px solid var(--border); }
+
+        .highlights li::before {
+            content: "·";
+            color: var(--accent);
+            position: absolute;
+            left: 4px;
+        }
+
+        .paper-title {
+            color: #ccc;
+        }
+
+        /* ── Jobs ── */
+        .job-list { list-style: none; }
+
+        .job {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .job:first-child { border-top: 1px solid var(--border); }
+
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .job-title {
+            font-size: 0.95rem;
+            color: var(--text);
+        }
+
+        .job-title a { color: var(--muted); text-decoration: none; font-weight: normal; }
+        .job-title a:hover { color: var(--text); }
+
+        .job-dates {
+            font-size: 0.88rem;
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        .job-bullets { list-style: none; margin-top: 4px; }
+
+        .job-bullets li {
+            font-size: 0.88rem;
+            color: var(--muted);
+            padding: 1px 0 1px 16px;
+            position: relative;
+        }
+
+        .job-bullets li::before {
+            content: "·";
+            color: var(--border);
+            position: absolute;
+            left: 4px;
+        }
+
+        /* ── Education ── */
+        .edu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 10px 0 4px;
+            border-top: 1px solid var(--border);
+        }
+
+        .edu-title { font-size: 0.95rem; color: var(--text); }
+        .edu-dates { font-size: 0.88rem; color: var(--muted); white-space: nowrap; }
+
+        .edu-bullets { list-style: none; }
+
+        .edu-bullets li {
+            font-size: 0.88rem;
+            color: var(--muted);
+            padding: 1px 0 1px 16px;
+            position: relative;
+        }
+
+        .edu-bullets li::before {
+            content: "·";
+            color: var(--border);
+            position: absolute;
+            left: 4px;
+        }
+
+        /* ── Footer ── */
+        footer {
+            margin-top: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .footer-links { display: flex; gap: 20px; }
+
+        .footer-links a {
+            font-family: var(--font-mono);
+            font-size: 0.88rem;
+            color: var(--muted);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .footer-links a:hover { color: var(--accent); }
+
+        .cta {
+            font-family: var(--font-mono);
+            font-size: 0.88rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--accent);
+            border: 1px solid #b56b00;
+            padding: 5px 14px;
+            text-decoration: none;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+
+        .cta:hover {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        @media print {
+            body { background: white; color: black; padding: 20px; }
+            :root { --bg: white; --text: #111; --muted: #444; --accent: #b36000; --border: #ccc; }
+            footer .cta { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Mihai Cosma</h1>
+        <p class="contact">+1 (613) 413-0204 &nbsp;·&nbsp; <a href="mailto:mcosma@gmail.com">mcosma@gmail.com</a></p>
+        <div class="taglines">
+            DeFi, portfolio management, trading, coding<br>
+            True believer in DeFi's ability to re-design the financial system for the benefit of all<br>
+            Twelve years managing Canada's foreign reserves ($70bln+ fixed income portfolio)
+        </div>
+    </div>
+
+    <div class="rule">────────────────────────────────────────────────────────────────────────────────────────────────────────────────</div>
+
+    <div class="section">
+        <div class="section-header">[ blockchain ]</div>
+        <ul class="highlights">
+            <li>Active DeFi Degen with first-hand experience of three rug-pulls</li>
+            <li>Community contribution prize in Dark Forest Round 3 blockchain game (plugin and custom client development)</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <div class="section-header">[ technical ]</div>
+        <ul class="highlights">
+            <li>Accepted PRs in eth-tester, ApeWorX, Reth, lodestar, PyGithub, TrueBlocks, and LeelaChessZero</li>
+            <li>Actively benchmarking local LLMs for coding on a local 3090 at <a href="https://github.com/wakamex/human3090" style="color:var(--muted);text-decoration:none;">github.com/wakamex/human3090</a></li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <div class="section-header">[ tradfi ]</div>
+        <ul class="highlights">
+            <li>Developed multi-strategy security selection, including neural networks and gradient boosted machines in 2017</li>
+            <li>Co-author of <span class="paper-title">"A Framework in Search of an Optimal Margining Policy for Official Institutions: The Canadian Experience"</span>, Nakashima, Cosma, Plong, March 2016</li>
+        </ul>
+    </div>
+
+    <div class="rule">────────────────────────────────────────────────────────────────────────────────────────────────────────────────</div>
+
+    <div class="section">
+        <div class="section-header">[ work experience ]</div>
+        <ul class="job-list">
+
+            <li class="job">
+                <div class="job-header">
+                    <span class="job-title">DeFi Strategist &nbsp;·&nbsp; <a href="https://veda.tech">Veda</a></span>
+                    <span class="job-dates">Sep 2025 – Present</span>
+                </div>
+                <ul class="job-bullets">
+                    <li>Managing and curating Veda vaults</li>
+                </ul>
+            </li>
+
+            <li class="job">
+                <div class="job-header">
+                    <span class="job-title">DeFi Strategist &nbsp;·&nbsp; <a href="https://www.euler.finance">Euler Finance</a></span>
+                    <span class="job-dates">Jun 2025 – Sep 2025</span>
+                </div>
+                <ul class="job-bullets">
+                    <li>Evangelizing EulerSwap</li>
+                </ul>
+            </li>
+
+            <li class="job">
+                <div class="job-header">
+                    <span class="job-title">DeFi Strategist &nbsp;·&nbsp; <a href="https://delv.tech">DELV</a></span>
+                    <span class="job-dates">Dec 2021 – Apr 2025</span>
+                </div>
+                <ul class="job-bullets">
+                    <li>Evangelizing onchain fixed income</li>
+                    <li>Co-author of <span class="paper-title">"The Hyperdrive Protocol: An Automated Market Maker for Fixed and Variable Rates"</span></li>
+                    <li>Wrote Python SDK and fuzzing framework for systematic trading bots on Hyperdrive (agent0)</li>
+                    <li>Designed and led incentive campaign for Hyperdrive rewards leading to record volume</li>
+                </ul>
+            </li>
+
+            <li class="job">
+                <div class="job-header">
+                    <span class="job-title">Senior Portfolio Manager, Foreign Reserves &nbsp;·&nbsp; <a href="https://www.bankofcanada.ca">Bank of Canada</a></span>
+                    <span class="job-dates">Jun 2021 – Dec 2021</span>
+                </div>
+                <ul class="job-bullets">
+                    <li>Co-head of $20 billion non-USD credit portfolio (SSA and EGB in EUR and GBP)</li>
+                </ul>
+            </li>
+
+            <li class="job">
+                <div class="job-header">
+                    <span class="job-title">Policy Analyst, Foreign Debt and Asset Policy &nbsp;·&nbsp; <a href="https://www.bankofcanada.ca">Bank of Canada</a></span>
+                    <span class="job-dates">Jan 2018 – Jun 2021</span>
+                </div>
+                <ul class="job-bullets">
+                    <li>Designed analytical framework for portfolio construction</li>
+                    <li>Created backtesting framework to question modelling assumptions</li>
+                    <li>Questioned coherence of analysis across different levels of granularity from security to portfolio level</li>
+                </ul>
+            </li>
+
+            <li class="job">
+                <div class="job-header">
+                    <span class="job-title">Portfolio Manager, Foreign Reserves &nbsp;·&nbsp; <a href="https://www.bankofcanada.ca">Bank of Canada</a></span>
+                    <span class="job-dates">Jun 2015 – Dec 2017</span>
+                </div>
+                <ul class="job-bullets">
+                    <li>Outperformed dynamic benchmark through discretionary credit allocation of €14 billion Euro SSA portfolio</li>
+                    <li>Built, maintained, and implemented quantitative models optimizing exposures at both trade and portfolio level</li>
+                    <li>Explored best execution methods in illiquid markets, for both active and passive positions</li>
+                </ul>
+            </li>
+
+            <li class="job">
+                <div class="job-header">
+                    <span class="job-title">Trader Analyst, Foreign Reserves &nbsp;·&nbsp; <a href="https://www.bankofcanada.ca">Bank of Canada</a></span>
+                    <span class="job-dates">Aug 2013 – Jun 2015</span>
+                </div>
+                <ul class="job-bullets">
+                    <li>Briefed senior management on all topics of interest related to developed fixed income market</li>
+                    <li>Analyzed new investment opportunities, leading to expansion of investment universe and counterparty lists</li>
+                </ul>
+            </li>
+
+            <li class="job">
+                <div class="job-header">
+                    <span class="job-title">Research Assistant, Foreign Reserves &nbsp;·&nbsp; <a href="https://www.bankofcanada.ca">Bank of Canada</a></span>
+                    <span class="job-dates">Jul 2009 – Aug 2013</span>
+                </div>
+                <ul class="job-bullets">
+                    <li>Coded cross currency swap pricer and interest rate simulation to estimate regulatory capital cost</li>
+                </ul>
+            </li>
+
+        </ul>
+    </div>
+
+    <div class="section">
+        <div class="section-header">[ education ]</div>
+        <div class="edu-header">
+            <span class="edu-title">BA Economics &nbsp;·&nbsp; Carleton University</span>
+            <span class="edu-dates">Sep 2004 – Apr 2009</span>
+        </div>
+        <ul class="edu-bullets">
+            <li>Concentration in Financial Economics</li>
+            <li>Executive member of the Sprott Finance Students Association</li>
+        </ul>
+    </div>
+
+    <footer>
+        <div class="footer-links">
+            <a href="/">home</a>
+            <a href="https://github.com/wakamex">github</a>
+            <a href="mailto:mcosma@gmail.com">mcosma@gmail.com</a>
+        </div>
+
+        <a class="cta" href="mailto:mcosma@gmail.com">get in touch</a>
+    </footer>
+
+</body>
+</html>

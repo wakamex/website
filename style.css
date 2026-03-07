@@ -79,6 +79,90 @@ a:hover { border-bottom-color: #e8dcc0; }
 .previously a { color: #b6aa99; }
 .previously a:hover { color: #ff9800; }
 
+/* ── Meters (toolcore) ── */
+.meters {
+    float: right;
+    background: #1c1c2e;
+    border: 1px solid #3a3a5c;
+    padding: 0;
+    margin: 0 0 8px 16px;
+    font-family: "D2Coding";
+}
+
+.meters-title {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #7070a0;
+    padding: 4px 10px;
+    border-bottom: 1px solid #3a3a5c;
+}
+
+.meters-body {
+    padding: 6px 10px;
+}
+
+.meter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 0.75rem;
+    margin-bottom: 4px;
+}
+
+.meter:last-child { margin-bottom: 0; }
+
+.meter-name {
+    color: #7070a0;
+    width: 44px;
+    flex-shrink: 0;
+}
+
+.meter-bar {
+    width: 72px;
+    height: 14px;
+    background: #0e0e1a;
+    border: 1px solid #3a3a5c;
+    overflow: hidden;
+    flex-shrink: 0;
+    position: relative;
+    display: inline-block;
+}
+
+.meter-fill { height: 100%; display: block; }
+.meter-plan {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.5rem;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.04em;
+    pointer-events: none;
+}
+.meter-fill.ok { background: #4caf50; }
+.meter-fill.warn { background: #ff9800; }
+.meter-fill.over { background: #e05252; }
+
+.meter-mult {
+    width: 28px;
+    text-align: right;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+.meter-mult.ok { color: #4caf50; }
+.meter-mult.warn { color: #ff9800; }
+.meter-mult.over { color: #e05252; }
+
 .links {
     margin-top: 28px;
     padding-top: 12px;

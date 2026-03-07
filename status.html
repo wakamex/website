@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mihai Cosma — Status</title>
+    <style>
+        @font-face {
+            font-family: "D2Coding";
+            src: url("/D2CodingLigature.ttf") format("truetype");
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #12121e;
+            color: #d4d4d8;
+            font-family: "D2Coding";
+            font-size: 0.875rem;
+            line-height: 1.5;
+            padding: 8px;
+        }
+
+        .dim { color: #7070a0; }
+        .ok { color: #4caf50; }
+        .warn { color: #ff9800; }
+        .over { color: #e05252; }
+
+        .titlebar {
+            background: #0a0a18;
+            border: 1px solid #3a3a5c;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .titlebar a {
+            color: #7070a0;
+            text-decoration: none;
+        }
+        .titlebar a:hover { color: #d4d4d8; }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .panel {
+            background: #1c1c2e;
+            border: 1px solid #3a3a5c;
+            padding: 0;
+        }
+
+        .panel-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #7070a0;
+            padding: 6px 12px;
+            border-bottom: 1px solid #3a3a5c;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .panel-body { padding: 10px 12px; }
+
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            margin-bottom: 6px;
+        }
+
+        .status-row:last-child { margin-bottom: 0; }
+
+        .meter-row {
+            margin-bottom: 10px;
+        }
+
+        .meter-row:last-child { margin-bottom: 0; }
+
+        .meter-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            margin-bottom: 4px;
+        }
+
+        .meter-label { color: #d4d4d8; }
+        .meter-info { color: #7070a0; font-size: 0.75rem; }
+
+        .meter-bar {
+            width: 100%;
+            height: 8px;
+            background: #0e0e1a;
+            border: 1px solid #3a3a5c;
+            overflow: hidden;
+            margin-bottom: 2px;
+        }
+
+        .meter-fill { height: 100%; }
+        .meter-fill.ok { background: #4caf50; }
+        .meter-fill.warn { background: #ff9800; }
+        .meter-fill.over { background: #e05252; }
+
+        .meter-footer {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: #7070a0;
+        }
+
+        .meter-pace { font-size: 0.75rem; }
+
+        .updated {
+            font-size: 0.7rem;
+            color: #7070a0;
+            text-align: right;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 500px) {
+            .layout { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="titlebar">
+        <span>status — mihai cosma</span>
+        <a href="/">← home</a>
+    </div>
+
+    <div class="layout">
+        <div class="panel" id="claude-panel">
+            <div class="panel-title">
+                <span>Claude</span>
+                <span id="claude-plan" class="dim">—</span>
+            </div>
+            <div class="panel-body" id="claude-body">
+                <span class="dim">loading...</span>
+            </div>
+        </div>
+
+        <div class="panel" id="codex-panel">
+            <div class="panel-title">
+                <span>Codex</span>
+                <span id="codex-plan" class="dim">—</span>
+            </div>
+            <div class="panel-body" id="codex-body">
+                <span class="dim">no data</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="updated" id="updated"></div>
+
+    <script>
+    (function() {
+        function multClass(m) {
+            if (m < 0.8) return 'ok';
+            if (m <= 1.0) return 'warn';
+            return 'over';
+        }
+
+        function calcMult(pct, resetsAt, periodHours) {
+            if (!resetsAt || !pct) return null;
+            var remaining = (new Date(resetsAt) - new Date()) / 3600000;
+            var elapsed = periodHours - remaining;
+            if (elapsed <= 0) return null;
+            return pct / ((elapsed / periodHours) * 100);
+        }
+
+        function fmtReset(iso) {
+            if (!iso) return '';
+            var secs = (new Date(iso) - new Date()) / 1000;
+            if (secs <= 0) return 'now';
+            var h = Math.floor(secs / 3600);
+            if (h >= 24) return Math.floor(h / 24) + 'd ' + (h % 24) + 'h';
+            var m = Math.floor((secs % 3600) / 60);
+            return h + 'h ' + m + 'm';
+        }
+
+        function fmtAge(iso) {
+            if (!iso) return '';
+            var secs = (new Date() - new Date(iso)) / 1000;
+            if (secs < 60) return 'just now';
+            var m = Math.floor(secs / 60);
+            if (m < 60) return m + 'm ago';
+            var h = Math.floor(m / 60);
+            return h + 'h ' + (m % 60) + 'm ago';
+        }
+
+        function meterRow(label, pct, mult, resetsAt, periodHours) {
+            var cls = mult !== null ? multClass(mult) : 'ok';
+            var fillW = Math.min(pct, 100);
+            var multStr = mult !== null ? mult.toFixed(1) + 'x' : '';
+            var reset = fmtReset(resetsAt);
+            return '<div class="meter-row">' +
+                '<div class="meter-header">' +
+                    '<span class="meter-label">' + label + '</span>' +
+                    '<span class="meter-pace ' + cls + '">' + multStr + '</span>' +
+                '</div>' +
+                '<div class="meter-bar"><div class="meter-fill ' + cls + '" style="width:' + fillW + '%"></div></div>' +
+                '<div class="meter-footer">' +
+                    '<span>' + Math.round(pct) + '% used</span>' +
+                    (reset ? '<span>resets ' + reset + '</span>' : '') +
+                '</div>' +
+                '</div>';
+        }
+
+        fetch('/usage.json').then(function(r) { return r.json(); }).then(function(d) {
+            if (d.claude) {
+                var c = d.claude;
+                document.getElementById('claude-plan').textContent = c.plan || '—';
+
+                var html = '';
+                if (c['5h']) {
+                    var m = calcMult(c['5h'].pct, c['5h'].resets_at, 5);
+                    html += meterRow('Session (5h)', c['5h'].pct, m, c['5h'].resets_at, 5);
+                }
+                if (c['7d']) {
+                    var m = calcMult(c['7d'].pct, c['7d'].resets_at, 168);
+                    html += meterRow('Week (all models)', c['7d'].pct, m, c['7d'].resets_at, 168);
+                }
+                if (c['7d_sonnet']) {
+                    var m = calcMult(c['7d_sonnet'].pct, c['7d_sonnet'].resets_at, 168);
+                    html += meterRow('Week (Sonnet)', c['7d_sonnet'].pct, m, c['7d_sonnet'].resets_at, 168);
+                }
+                if (c.extra_usage && c.extra_usage.is_enabled) {
+                    var used = c.extra_usage.used_credits || 0;
+                    var limit = c.extra_usage.monthly_limit || 1;
+                    var pct = (used / limit) * 100;
+                    html += '<div class="status-row"><span class="dim">Extra usage</span><span>$' +
+                        (used / 100).toFixed(2) + ' / $' + (limit / 100).toFixed(2) + '</span></div>';
+                }
+                document.getElementById('claude-body').innerHTML = html || '<span class="dim">no buckets</span>';
+                document.getElementById('updated').textContent = 'updated ' + fmtAge(c.updated_at);
+            }
+
+            if (d.codex) {
+                var x = d.codex;
+                document.getElementById('codex-plan').textContent = x.plan || '—';
+                var html = '';
+                if (x['5h']) {
+                    var m = calcMult(x['5h'].pct, x['5h'].resets_at, 5);
+                    html += meterRow('Session (5h)', x['5h'].pct, m, x['5h'].resets_at, 5);
+                }
+                if (x['7d']) {
+                    var m = calcMult(x['7d'].pct, x['7d'].resets_at, 168);
+                    html += meterRow('Week', x['7d'].pct, m, x['7d'].resets_at, 168);
+                }
+                if (x.additional) {
+                    x.additional.forEach(function(a) {
+                        if (a.primary) {
+                            var m = calcMult(a.primary.pct, a.primary.resets_at, 5);
+                            html += meterRow(a.name + ' (5h)', a.primary.pct, m, a.primary.resets_at, 5);
+                        }
+                        if (a.secondary) {
+                            var m = calcMult(a.secondary.pct, a.secondary.resets_at, 168);
+                            html += meterRow(a.name + ' (7d)', a.secondary.pct, m, a.secondary.resets_at, 168);
+                        }
+                    });
+                }
+                document.getElementById('codex-body').innerHTML = html || '<span class="dim">no data</span>';
+            }
+        }).catch(function() {
+            document.getElementById('claude-body').innerHTML = '<span class="dim">offline</span>';
+        });
+    })();
+    </script>
+</body>
+</html>

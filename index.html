@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+    <div class="meters" id="meters"></div>
     <h1>Mihai Cosma</h1>
     <p class="tagline">I vibe code in prod.</p>
     <p class="intro">Maximum agent velocity through experimentation.</p>
@@ -35,10 +36,63 @@
         <li><a href="https://github.com/wakamex/spillage">energy spillage</a> attempt to repurpose ICLR 2026 hallucination metric for test-time tree search. <a href="https://mihaicosma.com/spillage.html">/collab</a> for research design. Found energy spillage is confidence proxy, and underperforms min(log_prob). Killed via predefined go/no-go gates.</li>
     </ul>
 
+    <script>
+    (function() {
+        function multClass(m) {
+            if (m < 0.8) return 'ok';
+            if (m <= 1.0) return 'warn';
+            return 'over';
+        }
+
+        function calcMult(pct, resetsAt, periodHours) {
+            if (!resetsAt || !pct) return null;
+            var remaining = (new Date(resetsAt) - new Date()) / 3600000;
+            var elapsed = periodHours - remaining;
+            if (elapsed <= 0) return null;
+            return pct / ((elapsed / periodHours) * 100);
+        }
+
+        function meter(label, pct, mult, plan) {
+            var cls = mult !== null ? multClass(mult) : 'ok';
+            var fillW = Math.min(pct, 100);
+            var multStr = mult !== null ? mult.toFixed(1) + 'x' : '';
+            var planStr = plan || '';
+            return '<span class="meter">' +
+                '<span class="meter-name">' + label + '</span>' +
+                '<span class="meter-bar"><span class="meter-fill ' + cls + '" style="width:' + fillW + '%"></span><span class="meter-plan">' + planStr + '</span></span>' +
+                '<span class="meter-mult ' + cls + '">' + multStr + '</span>' +
+                '</span>';
+        }
+
+        fetch('/usage.json').then(function(r) { return r.json(); }).then(function(d) {
+            var el = document.getElementById('meters');
+            var html = '<div class="meters-title"><span>Weekly</span><span>Pace</span></div><div class="meters-body">';
+
+            if (d.claude && d.claude['7d']) {
+                var c = d.claude;
+                var m = calcMult(c['7d'].pct, c['7d'].resets_at, 168);
+                html += meter('claude', c['7d'].pct, m, c.plan);
+            }
+
+            if (d.codex && d.codex['7d']) {
+                var x = d.codex;
+                var m = calcMult(x['7d'].pct, x['7d'].resets_at, 168);
+                html += meter('codex', x['7d'].pct, m, x.plan);
+            } else {
+                html += meter('codex', 0, null);
+            }
+
+            html += '</div>';
+            el.innerHTML = html;
+        }).catch(function() {});
+    })();
+    </script>
+
     <div class="links">
         <a href="https://github.com/wakamex">GitHub</a>
         <a href="https://x.com/mihai673">Twitter</a>
         <a href="/resume.html">Resume</a>
+        <a href="/status.html">Status</a>
     </div>
 </body>
 </html>

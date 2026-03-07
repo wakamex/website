@@ -8,26 +8,36 @@
 </head>
 <body>
     <h1>Mihai Cosma</h1>
-    <p class="tagline">DeFi developer and quantitative analyst in Ottawa, Canada.</p>
+    <p class="tagline">I vibe code in prod.</p>
+    <p class="intro">Maximum agent velocity through experimentation.</p>
 
-    <p>I build tools for decentralized finance, with a background in economics and traditional finance. I'm interested in fixed-rate protocols, yield optimization, and making DeFi more accessible.</p>
-
-    <h2>Projects</h2>
+    <h2>Agent Harnesses</h2>
+    <p class="section-note">Orchestration, memory, context compression, communication architectures</p>
     <ul>
-        <li><a href="/cpudata/">CPU Data</a> — Daily CPU price/performance analysis</li>
-        <li><a href="/spread/">Spread</a> — RSVP speed reader for Android</li>
-        <li><a href="/shaarli/">Shaarli</a> — Personal bookmarks</li>
+        <li><a href="https://github.com/wakamex/swarmhost">swarmhost</a> multi-agent orchestrator with dependency graphs, built by reverse-engineering Claude Code's /batch in &lt;12 hours. Stateless planner/worker/merger architecture with continuous task refill. Use to ship 15K LOC production codebase in 26 hours.</li>
+        <li><a href="https://github.com/wakamex/panetone">panetone</a> 1-file Python bridge for 2-way communication with Claude/Codex/Gemini/OpenCode harnesses via Telegram/Signal/Slack. Initiate multi-way agent debates via /collab. Persistent multi-agent sessions in wezterm-mux-server with <a href="https://github.com/wezterm/wezterm/pull/7590">upstream bugfix</a>.</li>
+        <li><a href="https://github.com/wakamex/longmem">longmem</a> ablation study on agent memory retrieval beats <a href="https://mastra.ai/docs/memory/observational-memory">Mastra-AI</a>'s LongMemEval SOTA with just embeddings and terse prompts. Novel application of <a href="https://huggingface.co/lightonai/ColBERT-Zero">ColBERT-Zero</a> for long-context retrieval. Complexity hurts.</li>
     </ul>
 
-    <h2>Education</h2>
-    <p>B.A. Honours Economics, Carleton University<br>
-    <span class="tagline">Financial Economics concentration, Business minor</span></p>
+    <h2>Evaluation & Affordances</h2>
+    <p class="section-note">Quantitative benchmarks, agent capabilities, automated evaluation</p>
+    <ul>
+        <li><a href="https://github.com/wakamex/human3090">human3090</a> LLM coding benchmark suite. 18+ models on HumanEval + LiveCodeBench, multi-backend (llama.cpp, HuggingFace, API), YAML job queue, efficiency frontier analysis.</li>
+        <li><a href="https://github.com/wakamex/search-claude-history">search-claude-history</a> gives Claude a CLI tool to search session history. Optional project-scope, retrieval params. Three-tier engine (ripgrep → hyperscan → mmap). <a href="https://pypi.org/project/search-claude-history/">uv tool install search-claude-history</a>.</li>
+        <li><a href="https://redvsblue.fyi">redvsblue.fyi</a> reproducible economic analysis of Presidential control on 83 economic metrics, powered by 4 rounds of multi-agent review (Claude/Gemini/ChatGPT). Auto-updated weekly via GitHub Actions.</li>
+    </ul>
+
+    <h2>ML Research & RL</h2>
+    <p class="section-note">Novel architectures, reinforcement learning, empirical results</p>
+    <ul>
+        <li><a href="https://github.com/wakamex/rc">reservoir computing for LLMs</a> to provide dynamical latent-space scratchpad for LLM test-time compute. Early results show memory task improvement with 0.085% trainable params. 3-track design with hard go/no-go gates, 19+ literature references. Kicked off with <a href="https://mihaicosma.com/rc.html">/collab</a>. Ongoing, see <a href="https://github.com/wakamex/rc/blob/main/DIARY.md">DIARY.md</a>.</li>
+        <li><a href="https://github.com/wakamex/mnk">mnk</a>-game AlphaZero-style in Rust/CUDA to test transfer learning across board sizes finds improvement over learning from scratch. Hyperparameter sweeps and 75x speedup over reference Python, but improvements don't stack.</li>
+        <li><a href="https://github.com/wakamex/spillage">energy spillage</a> attempt to repurpose ICLR 2026 hallucination metric for test-time tree search. <a href="https://mihaicosma.com/spillage.html">/collab</a> for research design. Found energy spillage is confidence proxy, and underperforms min(log_prob). Killed via predefined go/no-go gates.</li>
+    </ul>
 
     <div class="links">
         <a href="https://github.com/wakamex">GitHub</a>
-        <a href="https://linkedin.com/in/mihai-cosma-1873465">LinkedIn</a>
         <a href="https://x.com/mihai673">Twitter</a>
-        <a href="https://bsky.app/profile/waka.mx">Bluesky</a>
         <a href="/resume.html">Resume</a>
     </div>
 </body>

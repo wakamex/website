@@ -1,19 +1,88 @@
-body {
-    font-family: system-ui, -apple-system, sans-serif;
-    max-width: 600px;
-    margin: 40px auto;
-    padding: 20px;
-    line-height: 1.6;
-    color: #333;
+@font-face {
+    font-family: "D2Coding";
+    src: url("/D2CodingLigature.ttf") format("truetype");
 }
-h1 { margin-bottom: 8px; }
-h2 { color: #555; margin-top: 28px; font-size: 1.1em; }
-.tagline { color: #666; margin-top: 0; }
-ul { padding-left: 20px; }
-li { margin: 6px 0; }
-a { color: #0066cc; }
-.links { margin-top: 32px; padding-top: 16px; border-top: 1px solid #eee; }
-.links a { display: block; margin: 8px 0; }
-.experience { margin: 16px 0; }
-.experience h3 { margin: 0 0 4px 0; font-size: 1em; }
-.experience .role { color: #666; font-size: 0.9em; margin: 0; }
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background: #040506;
+    color: #b6aa99;
+    font-family: "D2Coding";
+    font-size: 1rem;
+    line-height: 1.4;
+    padding: 20px 24px;
+}
+
+h1 {
+    font-size: 2.5rem;
+    font-weight: normal;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+    color: #e0e0e0;
+}
+
+.tagline {
+    font-size: 1rem;
+    color: #b6aa99;
+    margin-bottom: 8px;
+}
+
+.intro {
+    color: #b6aa99;
+    margin-bottom: 20px;
+}
+
+h2 {
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #ff9800;
+    margin-top: 16px;
+    margin-bottom: 4px;
+    padding-top: 16px;
+    border-top: 1px solid #6b5a35;
+}
+
+.section-note {
+    color: #a69987;
+    margin-bottom: 10px;
+}
+
+ul { list-style: none; padding: 0; }
+
+li {
+    padding: 3px 0;
+}
+
+code {
+    color: #e0e0e0;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.1em 0.4em;
+    border-radius: 4px;
+}
+
+a {
+    color: #e8dcc0;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(232, 220, 192, 0.4);
+    transition: border-color 0.2s ease;
+}
+a:hover { border-bottom-color: #e8dcc0; }
+
+.previously {
+    color: #b6aa99;
+    margin-top: 28px;
+    padding-top: 8px;
+}
+
+.previously a { color: #b6aa99; }
+.previously a:hover { color: #ff9800; }
+
+.links {
+    margin-top: 28px;
+    padding-top: 12px;
+    border-top: 1px solid #8a7d6a;
+    display: flex;
+    gap: 24px;
+}

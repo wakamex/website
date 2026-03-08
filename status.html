@@ -13,22 +13,22 @@
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            background: #12121e;
-            color: #d4d4d8;
+            background: #040506;
+            color: #b6aa99;
             font-family: "D2Coding";
             font-size: 0.875rem;
             line-height: 1.5;
             padding: 8px;
         }
 
-        .dim { color: #7070a0; }
-        .ok { color: #4caf50; }
-        .warn { color: #ff9800; }
-        .over { color: #e05252; }
+        .dim { color: #7a6e5e; }
+        .ok { color: #6b8f5e; }
+        .warn { color: #c4862c; }
+        .over { color: #b84a3a; }
 
         .titlebar {
-            background: #0a0a18;
-            border: 1px solid #3a3a5c;
+            background: #0a0908;
+            border: 1px solid #3d3428;
             padding: 4px 10px;
             font-size: 0.75rem;
             font-weight: 600;
@@ -40,10 +40,10 @@
         }
 
         .titlebar a {
-            color: #7070a0;
+            color: #7a6e5e;
             text-decoration: none;
         }
-        .titlebar a:hover { color: #d4d4d8; }
+        .titlebar a:hover { color: #b6aa99; }
 
         .layout {
             display: grid;
@@ -52,8 +52,8 @@
         }
 
         .panel {
-            background: #1c1c2e;
-            border: 1px solid #3a3a5c;
+            background: #0a0908;
+            border: 1px solid #3d3428;
             padding: 0;
         }
 
@@ -62,9 +62,9 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.08em;
-            color: #7070a0;
+            color: #7a6e5e;
             padding: 6px 12px;
-            border-bottom: 1px solid #3a3a5c;
+            border-bottom: 1px solid #3d3428;
             display: flex;
             justify-content: space-between;
         }
@@ -93,38 +93,50 @@
             margin-bottom: 4px;
         }
 
-        .meter-label { color: #d4d4d8; }
-        .meter-info { color: #7070a0; font-size: 0.75rem; }
+        .meter-label { color: #b6aa99; }
+        .meter-info { color: #7a6e5e; font-size: 0.75rem; }
 
         .meter-bar {
             width: 100%;
             height: 8px;
-            background: #0e0e1a;
-            border: 1px solid #3a3a5c;
+            background: #060504;
+            border: 1px solid #3d3428;
             overflow: hidden;
             margin-bottom: 2px;
         }
 
         .meter-fill { height: 100%; }
-        .meter-fill.ok { background: #4caf50; }
-        .meter-fill.warn { background: #ff9800; }
-        .meter-fill.over { background: #e05252; }
+        .meter-fill.ok { background: #6b8f5e; }
+        .meter-fill.warn { background: #c4862c; }
+        .meter-fill.over { background: #b84a3a; }
 
         .meter-footer {
             display: flex;
             justify-content: space-between;
             font-size: 0.7rem;
-            color: #7070a0;
+            color: #7a6e5e;
         }
 
         .meter-pace { font-size: 0.75rem; }
 
-        .updated {
+        .footer-row {
             font-size: 0.7rem;
-            color: #7070a0;
-            text-align: right;
+            color: #7a6e5e;
             margin-top: 8px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
         }
+        .footer-cell {
+            display: flex;
+            justify-content: space-between;
+        }
+        .footer-row a {
+            color: #7a6e5e;
+            text-decoration: none;
+        }
+        .footer-row a:hover { color: #b6aa99; }
+        .footer-row .right { text-align: right; }
 
         @media (max-width: 500px) {
             .layout { grid-template-columns: 1fr; }
@@ -159,7 +171,10 @@
         </div>
     </div>
 
-    <div class="updated" id="updated"></div>
+    <div class="footer-row">
+        <span class="footer-cell"><a href="https://github.com/wakamex/ccusage">ccusage</a><span id="claude-updated"></span></span>
+        <span class="footer-cell"><a href="https://github.com/wakamex/codex-cli-usage">codex-cli-usage</a><span id="codex-updated"></span></span>
+    </div>
 
     <script>
     (function() {
@@ -200,12 +215,12 @@
         function meterRow(label, pct, mult, resetsAt, periodHours) {
             var cls = mult !== null ? multClass(mult) : 'ok';
             var fillW = Math.min(pct, 100);
-            var multStr = mult !== null ? mult.toFixed(1) + 'x' : '';
+            var multStr = mult !== null ? mult.toFixed(2) + 'x' : '';
             var reset = fmtReset(resetsAt);
             return '<div class="meter-row">' +
                 '<div class="meter-header">' +
                     '<span class="meter-label">' + label + '</span>' +
-                    '<span class="meter-pace ' + cls + '">' + multStr + '</span>' +
+                    '<span class="meter-pace ' + cls + '">' + (multStr ? 'Pace: ' + multStr : '') + '</span>' +
                 '</div>' +
                 '<div class="meter-bar"><div class="meter-fill ' + cls + '" style="width:' + fillW + '%"></div></div>' +
                 '<div class="meter-footer">' +
@@ -241,7 +256,7 @@
                         (used / 100).toFixed(2) + ' / $' + (limit / 100).toFixed(2) + '</span></div>';
                 }
                 document.getElementById('claude-body').innerHTML = html || '<span class="dim">no buckets</span>';
-                document.getElementById('updated').textContent = 'updated ' + fmtAge(c.updated_at);
+                document.getElementById('claude-updated').textContent = 'updated ' + fmtAge(c.updated_at);
             }
 
             if (d.codex) {
@@ -269,6 +284,7 @@
                     });
                 }
                 document.getElementById('codex-body').innerHTML = html || '<span class="dim">no data</span>';
+                document.getElementById('codex-updated').textContent = 'updated ' + fmtAge(x.updated_at);
             }
         }).catch(function() {
             document.getElementById('claude-body').innerHTML = '<span class="dim">offline</span>';

@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-    <div class="meters" id="meters"></div>
+    <a href="/status.html" class="meters-link"><div class="meters" id="meters"></div></a>
     <h1>Mihai Cosma</h1>
     <p class="tagline">I vibe code in prod.</p>
     <p class="intro">Maximum agent velocity through experimentation.</p>
@@ -15,7 +15,7 @@
     <h2>Agent Harnesses</h2>
     <p class="section-note">Orchestration, memory, context compression, communication architectures</p>
     <ul>
-        <li><a href="https://github.com/wakamex/swarmhost">swarmhost</a> multi-agent orchestrator with dependency graphs, built by reverse-engineering Claude Code's /batch in &lt;12 hours. Stateless planner/worker/merger architecture with continuous task refill. Use to ship 15K LOC production codebase in 26 hours.</li>
+        <li><a href="https://github.com/wakamex/swarmhost">swarmhost</a> multi-agent orchestrator with dependency graphs, built by reverse-engineering Claude Code's /batch in &lt;12 hours. Stateless planner/worker/merger architecture with continuous task refill. Used to ship 15K LOC production codebase in 26 hours.</li>
         <li><a href="https://github.com/wakamex/panetone">panetone</a> 1-file Python bridge for 2-way communication with Claude/Codex/Gemini/OpenCode harnesses via Telegram/Signal/Slack. Initiate multi-way agent debates via /collab. Persistent multi-agent sessions in wezterm-mux-server with <a href="https://github.com/wezterm/wezterm/pull/7590">upstream bugfix</a>.</li>
         <li><a href="https://github.com/wakamex/longmem">longmem</a> ablation study on agent memory retrieval beats <a href="https://mastra.ai/docs/memory/observational-memory">Mastra-AI</a>'s LongMemEval SOTA with just embeddings and terse prompts. Novel application of <a href="https://huggingface.co/lightonai/ColBERT-Zero">ColBERT-Zero</a> for long-context retrieval. Complexity hurts.</li>
     </ul>

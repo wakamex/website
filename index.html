@@ -4,35 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Mihai Cosma</title>
+    <meta name="description" content="Maximum agent velocity through experimentation. Agent harnesses, evals, and ML/RL research.">
+    <meta property="og:title" content="Mihai Cosma">
+    <meta property="og:description" content="Maximum agent velocity through experimentation. Agent harnesses, evals, and ML/RL research.">
+    <meta property="og:image" content="https://mihaicosma.com/og-image.png">
+    <meta property="og:url" content="https://mihaicosma.com">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Mihai Cosma">
+    <meta name="twitter:description" content="Maximum agent velocity through experimentation. Agent harnesses, evals, and ML/RL research.">
+    <meta name="twitter:image" content="https://mihaicosma.com/og-image.png">
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
     <a href="/status.html" class="meters-link"><div class="meters" id="meters"></div></a>
     <h1>Mihai Cosma</h1>
-    <p class="tagline">I vibe code in prod.</p>
-    <p class="intro">Maximum agent velocity through experimentation.</p>
+    <p class="tagline">Emergence through chaos and order.</p>
 
     <h2>Agent Harnesses</h2>
-    <p class="section-note">Orchestration, memory, context compression, communication architectures</p>
+    <p class="section-note">Orchestration, memory, communication architectures</p>
     <ul>
-        <li><a href="https://github.com/wakamex/swarmhost">swarmhost</a> multi-agent orchestrator with dependency graphs, built by reverse-engineering Claude Code's /batch in &lt;12 hours. Stateless planner/worker/merger architecture with continuous task refill. Used to ship 15K LOC production codebase in 26 hours.</li>
-        <li><a href="https://github.com/wakamex/panetone">panetone</a> 1-file Python bridge for 2-way communication with Claude/Codex/Gemini/OpenCode harnesses via Telegram/Signal/Slack. Initiate multi-way agent debates via /collab. Persistent multi-agent sessions in wezterm-mux-server with <a href="https://github.com/wezterm/wezterm/pull/7590">upstream bugfix</a>.</li>
-        <li><a href="https://github.com/wakamex/longmem">longmem</a> ablation study on agent memory retrieval beats <a href="https://mastra.ai/docs/memory/observational-memory">Mastra-AI</a>'s LongMemEval SOTA with just embeddings and terse prompts. Novel application of <a href="https://huggingface.co/lightonai/ColBERT-Zero">ColBERT-Zero</a> for long-context retrieval. Complexity hurts.</li>
+        <li><a href="https://github.com/wakamex/panetone">panetone</a> 1-file Python bridge for 2-way communication with Claude/Codex/Gemini/OpenCode interactive sessions in wezterm-mux-server via Telegram/Signal/Slack. Launch multi-agent collaborative session via /collab.</li>
+        <li><a href="https://github.com/wakamex/swarmhost">swarmhost</a> multi-agent orchestration with dependency graphs, built by reverse-engineering Claude Code's /batch in &lt;12 hours. Stateless planner/worker/merger architecture with continuous task refill. Used to ship 15K LOC to prod in 26 hours.</li>
+        <li><a href="https://github.com/wakamex/longmem">longmem</a> ablation study on agent memory retrieval beats <a href="https://mastra.ai/docs/memory/observational-memory">Mastra-AI</a>'s LongMemEval SOTA with just embeddings and terse prompts. Novel application of <a href="https://huggingface.co/lightonai/ColBERT-Zero">ColBERT-Zero</a> for long-context retrieval. Conclusion is that complexity hurts.</li>
     </ul>
 
     <h2>Evaluation & Affordances</h2>
     <p class="section-note">Quantitative benchmarks, agent capabilities, automated evaluation</p>
     <ul>
-        <li><a href="https://github.com/wakamex/human3090">human3090</a> LLM coding benchmark suite. 18+ models on HumanEval + LiveCodeBench, multi-backend (llama.cpp, HuggingFace, API), YAML job queue, efficiency frontier analysis.</li>
-        <li><a href="https://github.com/wakamex/search-claude-history">search-claude-history</a> gives Claude a CLI tool to search session history. Optional project-scope, retrieval params. Three-tier engine (ripgrep → hyperscan → mmap). <a href="https://pypi.org/project/search-claude-history/">uv tool install search-claude-history</a>.</li>
-        <li><a href="https://redvsblue.fyi">redvsblue.fyi</a> reproducible economic analysis of Presidential control on 83 economic metrics, powered by 4 rounds of multi-agent review (Claude/Gemini/ChatGPT). Auto-updated weekly via GitHub Actions.</li>
+        <li><a href="https://github.com/wakamex/mad">mad</a> novel eval benchmark for LLM agent memory and multi-step planning over long game sequences. Agents reach 91% of ceiling with memory, and match random score without.</li>
+        <li><a href="https://github.com/wakamex/human3090">human3090</a> maps the efficient frontier of local coding LLMs at the trailing edge of hardware on my 3090.</li>
+        <li><a href="https://github.com/wakamex/search-claude-history">search-claude-history</a> lets Claude efficiently search session history through a simple CLI tool.</li>
+        <li><a href="https://redvsblue.fyi">redvsblue.fyi</a> reproducible economic analysis of US Presidential control on 83 economic metrics.</li>
     </ul>
 
-    <h2>ML Research & RL</h2>
+    <h2>ML/RL Research</h2>
     <p class="section-note">Novel architectures, reinforcement learning, empirical results</p>
     <ul>
-        <li><a href="https://github.com/wakamex/rc">reservoir computing for LLMs</a> to provide dynamical latent-space scratchpad for LLM test-time compute. Early results show memory task improvement with 0.085% trainable params. 3-track design with hard go/no-go gates, 19+ literature references. Kicked off with <a href="https://mihaicosma.com/rc.html">/collab</a>. Ongoing, see <a href="https://github.com/wakamex/rc/blob/main/DIARY.md">DIARY.md</a>.</li>
-        <li><a href="https://github.com/wakamex/mnk">mnk</a>-game AlphaZero-style in Rust/CUDA to test transfer learning across board sizes finds improvement over learning from scratch. Hyperparameter sweeps and 75x speedup over reference Python, but improvements don't stack.</li>
+        <li><a href="https://github.com/wakamex/rc">reservoir computing for LLMs</a> adds ESN sidecar to Qwen3.5-0.8B. 3x average exact-match across 23 benchmarks (0.12→0.36) at negligible perplexity cost (+0.3%). Perfect on passkey retrieval, near-perfect on multi-digit arithmetic, strong gains on variable tracking and program tracing. Kicked off with <a href="https://mihaicosma.com/rc.html">/collab</a>.</li>
+        <li><a href="https://github.com/wakamex/mnk">mnk</a>-game AlphaZero-style in Rust shows modest gains from transfer learning across board sizes. Hyperparameter sweeps and 75x speedup over reference Python, but improvements don't stack.</li>
         <li><a href="https://github.com/wakamex/spillage">energy spillage</a> attempt to repurpose ICLR 2026 hallucination metric for test-time tree search. <a href="https://mihaicosma.com/spillage.html">/collab</a> for research design. Found energy spillage is confidence proxy, and underperforms min(log_prob). Killed via predefined go/no-go gates.</li>
     </ul>
 

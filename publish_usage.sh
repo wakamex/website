@@ -23,6 +23,8 @@ json.dump(out, sys.stdout)
 if [ "$1" = "-daemon" ]; then
     publish
     inotifywait -m -e close_write "$CLAUDE" "$CODEX" 2>/dev/null | while read -r _dir _event _file; do
+        # Coalesce near-simultaneous cache writes from both daemons.
+        sleep 1
         publish
     done
 else

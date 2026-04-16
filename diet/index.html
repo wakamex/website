@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Stigler 2026 — Mihai Cosma</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        body { max-width: 760px; padding-bottom: 48px; }
+        h1 { font-size: 2rem; }
+        .tagline { color: #b6aa99; margin-bottom: 24px; }
+
+        .pillrow {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin: 8px 0 16px;
+        }
+        .pill {
+            font-family: "D2Coding";
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 6px 12px;
+            border: 1px solid #6b5a35;
+            border-radius: 999px;
+            background: transparent;
+            color: #b6aa99;
+            cursor: pointer;
+            transition: color 0.15s, border-color 0.15s, background 0.15s;
+        }
+        .pill:hover { color: #e0e0e0; border-color: #c4b5a0; }
+        .pill.active {
+            color: #040506;
+            background: #ff9800;
+            border-color: #b56b00;
+            font-weight: 700;
+        }
+        .pill:focus { outline: none; box-shadow: 0 0 0 3px rgba(255,152,0,0.2); }
+
+        .pillrow-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #8a7d6a;
+            margin-top: 4px;
+            margin-bottom: 4px;
+        }
+
+        .summary {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            border: 1px solid #6b5a35;
+            border-radius: 6px;
+            padding: 14px 16px;
+            margin: 16px 0;
+            background: #0e0e10;
+        }
+        .summary .item .label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #8a7d6a;
+        }
+        .summary .item .value {
+            font-family: "D2Coding";
+            font-variant-numeric: tabular-nums;
+            font-size: 1.4rem;
+            color: #e0e0e0;
+            font-weight: 700;
+        }
+        .summary .item .meta {
+            font-size: 0.85rem;
+            color: #b6aa99;
+        }
+
+        .banner {
+            border: 1px solid #b56b00;
+            background: rgba(255,152,0,0.08);
+            color: #ff9800;
+            padding: 10px 14px;
+            border-radius: 6px;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+        .banner.error {
+            border-color: #cf222e;
+            background: rgba(207,34,46,0.08);
+            color: #cf222e;
+        }
+
+        h2 {
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #ff9800;
+            margin-top: 28px;
+            margin-bottom: 8px;
+            padding-top: 12px;
+            border-top: 1px solid #6b5a35;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
+        th {
+            text-align: left;
+            font-weight: 600;
+            color: #8a7d6a;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.75rem;
+            padding: 8px;
+            border-bottom: 1px solid #6b5a35;
+        }
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #1a1916;
+            color: #b6aa99;
+        }
+        td.name { color: #e0e0e0; }
+        td.num {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            font-weight: 700;
+            color: #e0e0e0;
+        }
+        td.muted { color: #8a7d6a; }
+        tr:hover td { background: #0e0e10; }
+        tr.binding td.name,
+        tr.binding td.num {
+            color: #ff9800;
+        }
+
+        .footer {
+            margin-top: 40px;
+            padding-top: 16px;
+            border-top: 1px solid #6b5a35;
+            color: #8a7d6a;
+            font-size: 0.82rem;
+            line-height: 1.6;
+        }
+        .footer a { color: #b6aa99; border-bottom-color: rgba(182,170,153,0.4); }
+        .footer a:hover { color: #ff9800; border-bottom-color: #ff9800; }
+
+        .loading { color: #8a7d6a; font-style: italic; padding: 24px 0; }
+
+        .back { margin-bottom: 24px; }
+
+        /* Reserve the data-bearing regions until JS swaps in real content (avoids
+           a flash of "Loading…"). After body.fade-in is set, regions reveal. */
+        body:not(.fade-in) .summary,
+        body:not(.fade-in) #nutrients { visibility: hidden; }
+    </style>
+</head>
+<body>
+    <p class="back"><a href="/">&larr; Back</a></p>
+    <h1>Stigler 2026</h1>
+    <p class="tagline">The cheapest shoppable basket at Kroger that hits your daily nutrient targets — by diet mode and region.</p>
+
+    <div class="pillrow-label">Diet</div>
+    <div class="pillrow" id="modes" role="tablist"></div>
+
+    <div class="pillrow-label">Location</div>
+    <div class="pillrow" id="locations" role="tablist"></div>
+
+    <div id="banner-host"></div>
+
+    <div class="summary" id="summary">
+        <div class="item"><div class="label">Daily cost</div><div class="value" id="cost">—</div></div>
+        <div class="item"><div class="label">Foods</div><div class="value" id="food-count">—</div></div>
+        <div class="item"><div class="label">Store</div><div class="value" id="store">—</div></div>
+        <div class="item"><div class="label">Updated</div><div class="value" id="updated">—</div></div>
+    </div>
+
+    <h2>Basket</h2>
+    <div id="basket" class="loading">Loading…</div>
+
+    <h2>Nutrients</h2>
+    <p class="section-note" style="color:#8a7d6a; font-size:0.82rem; margin-bottom: 4px;">
+        <span style="color:#ff9800; font-weight: 700;">Orange</span> rows are binding constraints — the marginal $/unit-of-nutrient at the optimum is the shadow price.
+    </p>
+    <div id="nutrients"></div>
+
+    <div class="footer">
+        <p>Linear program: minimize daily $ subject to RDAs/ULs (NIH ODS, adult M 31–50), per-food serving caps, and dietary-mode exclusions. Solved with HiGHS via <code>scipy.optimize.linprog</code>.</p>
+        <p>Prices: <a href="https://developer.kroger.com/">Kroger Public Products API</a>, refreshed daily at the listed locationIds. Nutrients: <a href="https://fdc.nal.usda.gov/">USDA FoodData Central</a>. Targets: <a href="https://ods.od.nih.gov/HealthInformation/Dietary_Reference_Intakes.aspx">NIH ODS DRIs</a>.</p>
+        <p>Limits: Kroger only; promo prices may be loyalty-card-gated; assumes a single adult profile; ignores cooking, waste, bioavailability, palatability beyond a 500 g/day cap. Vegan diets typically need a fortified-D or B12 SKU added to <code>skus.yaml</code>.</p>
+        <p><a href="https://github.com/wakamex/diet">Source code</a></p>
+    </div>
+
+    <script>
+        const CDN = 'https://cdn.jsdelivr.net/gh/wakamex/diet@main/site';
+        const STATE = { mode: 'omnivore', region: null };
+        const MODES = ['omnivore', 'pescatarian', 'vegetarian', 'ovo_lacto', 'vegan'];
+        const MODE_LABELS = {omnivore:'omnivore', pescatarian:'pescatarian',
+                             vegetarian:'vegetarian', ovo_lacto:'ovo-lacto', vegan:'vegan'};
+
+        let DATA = null;
+
+        function fmtMoney(n) { return '$' + Number(n).toFixed(2); }
+        function fmtGrams(g) { return Math.round(g) + ' g'; }
+        function fmtNumber(n, digits) {
+            if (n === null || n === undefined) return '—';
+            return Number(n).toFixed(digits ?? 1);
+        }
+        function fmtShadow(s, unit) {
+            if (s === null || s === undefined || s === 0) return '—';
+            const abs = Math.abs(s);
+            if (abs < 0.001) return '$' + s.toExponential(2) + '/' + unit;
+            return '$' + abs.toFixed(4) + '/' + unit;
+        }
+        function fmtUpdated(iso) {
+            const d = new Date(iso);
+            return d.toISOString().slice(0, 10);
+        }
+
+        function buildPills(hostId, items, currentKey, getKey, getLabel, onClick) {
+            const host = document.getElementById(hostId);
+            host.innerHTML = '';
+            items.forEach(item => {
+                const k = getKey(item);
+                const btn = document.createElement('button');
+                btn.className = 'pill' + (k === currentKey ? ' active' : '');
+                btn.textContent = getLabel(item);
+                btn.setAttribute('role', 'tab');
+                btn.setAttribute('aria-selected', k === currentKey);
+                btn.addEventListener('click', () => onClick(k));
+                host.appendChild(btn);
+            });
+        }
+
+        function renderModePills(currentMode) {
+            buildPills('modes', MODES, currentMode, m => m, m => MODE_LABELS[m] || m,
+                       k => { STATE.mode = k; render(); });
+        }
+
+        function renderLocationPills(regions, currentRegion) {
+            buildPills('locations', regions, currentRegion, r => r, r => r,
+                       k => { STATE.region = k; render(); });
+        }
+
+        function findSolution() {
+            return DATA.solutions.find(s => s.mode === STATE.mode && s.location_region === STATE.region);
+        }
+
+        function renderBanner(sol) {
+            const host = document.getElementById('banner-host');
+            host.innerHTML = '';
+            if (!sol) return;
+            if (sol.status === 'infeasible') {
+                host.innerHTML = `<div class="banner error">No feasible diet for <b>${MODE_LABELS[sol.mode]}</b> at <b>${sol.location_region}</b>. ${sol.message || 'A nutrient target cannot be met from the available SKUs at the per-food serving cap.'}</div>`;
+            } else if (sol.status !== 'optimal') {
+                host.innerHTML = `<div class="banner">Solver returned <b>${sol.status}</b>: ${sol.message || ''}</div>`;
+            }
+        }
+
+        function renderSummary(sol) {
+            document.getElementById('cost').textContent = sol && sol.cost_per_day != null
+                ? fmtMoney(sol.cost_per_day) : '—';
+            document.getElementById('food-count').textContent = sol && sol.basket
+                ? sol.basket.length : '—';
+            document.getElementById('store').textContent = sol ? sol.location_display : '—';
+            document.getElementById('updated').textContent = DATA.updated
+                ? fmtUpdated(DATA.updated) : '—';
+        }
+
+        function renderBasket(sol) {
+            const host = document.getElementById('basket');
+            if (!sol || !sol.basket || !sol.basket.length) {
+                host.innerHTML = '<p class="muted" style="color:#8a7d6a;">No items selected.</p>';
+                return;
+            }
+            const rows = sol.basket.map(b => {
+                const meta = b.meta || {};
+                const unitGrams = meta.unit_grams;
+                const priceUsed = meta.price_used;
+                const priceKind = meta.price_kind || 'regular';
+                const unitPrice = (priceUsed != null) ? fmtMoney(priceUsed) : '—';
+                return `<tr>
+                    <td class="name">${b.name}</td>
+                    <td class="num">${fmtGrams(b.grams_per_day)}</td>
+                    <td class="num muted" title="${priceKind}">${unitPrice}</td>
+                    <td class="num">${fmtMoney(b.cost_per_day)}</td>
+                    <td class="num muted">${b.pct_of_basket}%</td>
+                </tr>`;
+            }).join('');
+            host.innerHTML = `<table>
+                <thead><tr>
+                    <th>SKU</th><th class="num">Grams/day</th>
+                    <th class="num">$/pkg</th><th class="num">$/day</th>
+                    <th class="num">% basket</th>
+                </tr></thead>
+                <tbody>${rows}</tbody>
+            </table>`;
+        }
+
+        function renderNutrients(sol) {
+            const host = document.getElementById('nutrients');
+            const targets = DATA.nutrient_targets || [];
+            const labelMap = Object.fromEntries(targets.map(t => [t.nutrient, t]));
+            if (!sol || !sol.nutrients || !sol.nutrients.length) {
+                host.innerHTML = '<p style="color:#8a7d6a;">—</p>';
+                return;
+            }
+            const rows = sol.nutrients.map(n => {
+                const t = labelMap[n.nutrient] || {};
+                const cls = n.binding ? 'binding' : '';
+                const kind = n.kind === 'rda' ? '≥' : '≤';
+                const shadow = fmtShadow(n.shadow_price_per_unit, n.unit);
+                return `<tr class="${cls}">
+                    <td class="name">${n.nutrient}</td>
+                    <td class="num muted">${kind} ${fmtNumber(n.target, 2)} ${n.unit}</td>
+                    <td class="num">${fmtNumber(n.delivered, 2)} ${n.unit}</td>
+                    <td class="num">${n.binding ? 'binding' : 'slack'}</td>
+                    <td class="num muted">${shadow}</td>
+                </tr>`;
+            }).join('');
+            host.innerHTML = `<table>
+                <thead><tr>
+                    <th>Nutrient</th><th class="num">Target</th>
+                    <th class="num">Delivered</th><th class="num">Status</th>
+                    <th class="num">Shadow price</th>
+                </tr></thead>
+                <tbody>${rows}</tbody>
+            </table>`;
+        }
+
+        function render() {
+            renderModePills(STATE.mode);
+            const regions = [...new Set(DATA.solutions.map(s => s.location_region))];
+            if (!STATE.region || !regions.includes(STATE.region)) STATE.region = regions[0];
+            renderLocationPills(regions, STATE.region);
+            const sol = findSolution();
+            renderBanner(sol);
+            renderSummary(sol || {location_display:'—'});
+            renderBasket(sol);
+            renderNutrients(sol);
+        }
+
+        function loadFrom(url) {
+            return fetch(url, { cache: 'no-cache' }).then(r => {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            });
+        }
+
+        // Try CDN first; fall back to local ./data.json for dev/preview.
+        loadFrom(`${CDN}/data.json`)
+            .catch(() => loadFrom('./data.json'))
+            .then(json => {
+                DATA = json;
+                document.body.classList.add('fade-in');
+                render();
+            })
+            .catch(err => {
+                document.getElementById('basket').innerHTML =
+                    '<p style="color:#cf222e;">Failed to load data: ' + err.message + '</p>';
+                console.error(err);
+            });
+    </script>
+</body>
+</html>

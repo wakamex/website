@@ -71,8 +71,18 @@
             font-weight: 700;
         }
         .summary .item .meta {
-            font-size: 0.85rem;
-            color: #b6aa99;
+            font-size: 0.8rem;
+            color: #8a7d6a;
+            font-variant-numeric: tabular-nums;
+            margin-top: 2px;
+        }
+        .supplement-row td.name::before {
+            content: "rx ";
+            color: #ff9800;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            vertical-align: middle;
         }
 
         .banner {
@@ -168,11 +178,14 @@
     <div class="pillrow-label">Location</div>
     <div class="pillrow" id="locations" role="tablist"></div>
 
+    <div class="pillrow-label">Basket</div>
+    <div class="pillrow" id="variants" role="tablist"></div>
+
     <div id="banner-host"></div>
 
     <div class="summary" id="summary">
-        <div class="item"><div class="label">Daily cost</div><div class="value" id="cost">—</div></div>
-        <div class="item"><div class="label">Foods</div><div class="value" id="food-count">—</div></div>
+        <div class="item"><div class="label">Daily cost</div><div class="value" id="cost">—</div><div class="meta" id="cost-delta"></div></div>
+        <div class="item"><div class="label">Items</div><div class="value" id="food-count">—</div></div>
         <div class="item"><div class="label">Store</div><div class="value" id="store">—</div></div>
         <div class="item"><div class="label">Updated</div><div class="value" id="updated">—</div></div>
     </div>
@@ -189,16 +202,19 @@
     <div class="footer">
         <p>Linear program: minimize daily $ subject to RDAs/ULs (NIH ODS, adult M 31–50), per-food serving caps, and dietary-mode exclusions. Solved with HiGHS via <code>scipy.optimize.linprog</code>.</p>
         <p>Prices: <a href="https://developer.kroger.com/">Kroger Public Products API</a>, refreshed daily at the listed locationIds. Nutrients: <a href="https://fdc.nal.usda.gov/">USDA FoodData Central</a>. Targets: <a href="https://ods.od.nih.gov/HealthInformation/Dietary_Reference_Intakes.aspx">NIH ODS DRIs</a>.</p>
-        <p>Limits: Kroger only; promo prices may be loyalty-card-gated; assumes a single adult profile; ignores cooking, waste, bioavailability, palatability beyond a 500 g/day cap. Vegan diets typically need a fortified-D or B12 SKU added to <code>skus.yaml</code>.</p>
+        <p>Limits: Kroger only; promo prices may be loyalty-card-gated; assumes a single adult profile; ignores cooking, waste, bioavailability, palatability beyond a 500 g/day cap.</p>
+        <p>The <b>food + pills</b> variant adds Kroger-brand multivitamin, B12, and calcium+D3 tablets priced via the same API. Supplement nutrients come from the Supplement Facts label (FDC doesn't cover pills). The cost delta between variants is the supplement arbitrage — typically $1–2/day.</p>
         <p><a href="https://github.com/wakamex/diet">Source code</a></p>
     </div>
 
     <script>
         const CDN = 'https://cdn.jsdelivr.net/gh/wakamex/diet@main/site';
-        const STATE = { mode: 'omnivore', region: null };
+        const STATE = { mode: 'omnivore', region: null, variant: 'food_only' };
         const MODES = ['omnivore', 'pescatarian', 'vegetarian', 'ovo_lacto', 'vegan'];
         const MODE_LABELS = {omnivore:'omnivore', pescatarian:'pescatarian',
                              vegetarian:'vegetarian', ovo_lacto:'ovo-lacto', vegan:'vegan'};
+        const VARIANTS = ['food_only', 'with_supplements'];
+        const VARIANT_LABELS = {food_only:'food only', with_supplements:'food + pills'};
 
         let DATA = null;
 
@@ -244,8 +260,15 @@
                        k => { STATE.region = k; render(); });
         }
 
-        function findSolution() {
-            return DATA.solutions.find(s => s.mode === STATE.mode && s.location_region === STATE.region);
+        function findSolution(variant) {
+            variant = variant || STATE.variant;
+            return DATA.solutions.find(s => s.mode === STATE.mode
+                && s.location_region === STATE.region
+                && (s.variant || 'food_only') === variant);
+        }
+
+        function hasAnySupplementSolution() {
+            return DATA.solutions.some(s => s.variant === 'with_supplements');
         }
 
         function renderBanner(sol) {
@@ -267,6 +290,20 @@
             document.getElementById('store').textContent = sol ? sol.location_display : '—';
             document.getElementById('updated').textContent = DATA.updated
                 ? fmtUpdated(DATA.updated) : '—';
+
+            // Cost delta: compare current variant to the other one at this (mode, region).
+            const deltaEl = document.getElementById('cost-delta');
+            deltaEl.textContent = '';
+            if (!hasAnySupplementSolution() || !sol || sol.cost_per_day == null) return;
+            const other = findSolution(STATE.variant === 'food_only' ? 'with_supplements' : 'food_only');
+            if (other && other.cost_per_day != null) {
+                const diff = sol.cost_per_day - other.cost_per_day;
+                const sign = diff > 0 ? '+' : '';
+                const otherLabel = VARIANT_LABELS[other.variant || 'food_only'];
+                deltaEl.textContent = `${sign}${fmtMoney(diff)} vs ${otherLabel}`;
+            } else if (other && other.status === 'infeasible') {
+                deltaEl.textContent = `(other variant infeasible)`;
+            }
         }
 
         function renderBasket(sol) {
@@ -277,13 +314,18 @@
             }
             const rows = sol.basket.map(b => {
                 const meta = b.meta || {};
-                const unitGrams = meta.unit_grams;
                 const priceUsed = meta.price_used;
                 const priceKind = meta.price_kind || 'regular';
                 const unitPrice = (priceUsed != null) ? fmtMoney(priceUsed) : '—';
-                return `<tr>
+                // Pills are shown as tablets/day rather than raw grams.
+                const isSupp = Boolean(meta.is_supplement);
+                const qty = isSupp && meta.tablet_g
+                    ? (b.grams_per_day / meta.tablet_g).toFixed(1) + ' tab'
+                    : fmtGrams(b.grams_per_day);
+                const cls = isSupp ? 'supplement-row' : '';
+                return `<tr class="${cls}">
                     <td class="name">${b.name}</td>
-                    <td class="num">${fmtGrams(b.grams_per_day)}</td>
+                    <td class="num">${qty}</td>
                     <td class="num muted" title="${priceKind}">${unitPrice}</td>
                     <td class="num">${fmtMoney(b.cost_per_day)}</td>
                     <td class="num muted">${b.pct_of_basket}%</td>
@@ -291,7 +333,7 @@
             }).join('');
             host.innerHTML = `<table>
                 <thead><tr>
-                    <th>SKU</th><th class="num">Grams/day</th>
+                    <th>SKU</th><th class="num">Per day</th>
                     <th class="num">$/pkg</th><th class="num">$/day</th>
                     <th class="num">% basket</th>
                 </tr></thead>
@@ -330,11 +372,25 @@
             </table>`;
         }
 
+        function renderVariantPills() {
+            const host = document.getElementById('variants');
+            if (!hasAnySupplementSolution()) {
+                host.innerHTML = '';
+                host.previousElementSibling.style.display = 'none';  // hide label
+                return;
+            }
+            host.previousElementSibling.style.display = '';
+            buildPills('variants', VARIANTS, STATE.variant,
+                       v => v, v => VARIANT_LABELS[v],
+                       k => { STATE.variant = k; render(); });
+        }
+
         function render() {
             renderModePills(STATE.mode);
             const regions = [...new Set(DATA.solutions.map(s => s.location_region))];
             if (!STATE.region || !regions.includes(STATE.region)) STATE.region = regions[0];
             renderLocationPills(regions, STATE.region);
+            renderVariantPills();
             const sol = findSolution();
             renderBanner(sol);
             renderSummary(sol || {location_display:'—'});

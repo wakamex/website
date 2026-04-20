@@ -6,9 +6,20 @@
     <title>Stigler 2026 — Mihai Cosma</title>
     <link rel="stylesheet" href="/style.css">
     <style>
-        body { max-width: 760px; padding-bottom: 48px; }
+        body { padding-bottom: 48px; }
         h1 { font-size: 2rem; }
         .tagline { color: #b6aa99; margin-bottom: 24px; }
+
+        /* Tables: keep the full column set readable on narrow viewports by
+           scrolling the table horizontally inside its container rather than
+           clipping columns or shrinking cells to the point of illegibility. */
+        .table-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-top: 8px;
+        }
+        .table-scroll table { margin-top: 0; }
+        .table-scroll table { min-width: 640px; }
 
         .pillrow {
             display: flex;
@@ -157,7 +168,7 @@
         .footer a { color: #b6aa99; border-bottom-color: rgba(182,170,153,0.4); }
         .footer a:hover { color: #ff9800; border-bottom-color: #ff9800; }
 
-        .loading { color: #8a7d6a; font-style: italic; padding: 24px 0; }
+        .loading { color: #8a7d6a; padding: 24px 0; }
 
         .back { margin-bottom: 24px; }
 
@@ -331,14 +342,14 @@
                     <td class="num muted">${b.pct_of_basket}%</td>
                 </tr>`;
             }).join('');
-            host.innerHTML = `<table>
+            host.innerHTML = `<div class="table-scroll"><table>
                 <thead><tr>
                     <th>SKU</th><th class="num">Per day</th>
                     <th class="num">$/pkg</th><th class="num">$/day</th>
                     <th class="num">% basket</th>
                 </tr></thead>
                 <tbody>${rows}</tbody>
-            </table>`;
+            </table></div>`;
         }
 
         function renderNutrients(sol) {
@@ -362,14 +373,14 @@
                     <td class="num muted">${shadow}</td>
                 </tr>`;
             }).join('');
-            host.innerHTML = `<table>
+            host.innerHTML = `<div class="table-scroll"><table>
                 <thead><tr>
                     <th>Nutrient</th><th class="num">Target</th>
                     <th class="num">Delivered</th><th class="num">Status</th>
                     <th class="num">Shadow price</th>
                 </tr></thead>
                 <tbody>${rows}</tbody>
-            </table>`;
+            </table></div>`;
         }
 
         function renderVariantPills() {

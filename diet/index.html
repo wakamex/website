@@ -175,7 +175,25 @@
         /* Reserve the data-bearing regions until JS swaps in real content (avoids
            a flash of "Loading…"). After body.fade-in is set, regions reveal. */
         body:not(.fade-in) .summary,
-        body:not(.fade-in) #nutrients { visibility: hidden; }
+        body:not(.fade-in) #nutrients,
+        body:not(.fade-in) #catalog { visibility: hidden; }
+
+        /* Catalog-specific tweaks */
+        #catalog td.name { font-size: 0.85rem; }
+        #catalog td.tag {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #8a7d6a;
+            white-space: nowrap;
+        }
+        #catalog tr.is-supplement td.name::before {
+            content: "rx ";
+            color: #ff9800;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
     </style>
 </head>
 <body>
@@ -209,6 +227,12 @@
         <span style="color:#ff9800; font-weight: 700;">Orange</span> rows are binding constraints — the marginal $/unit-of-nutrient at the optimum is the shadow price.
     </p>
     <div id="nutrients"></div>
+
+    <h2>Catalog</h2>
+    <p class="section-note" style="color:#8a7d6a; font-size:0.82rem; margin-bottom: 4px;">
+        Every SKU the pipeline knows about and its Kroger package price at each location from today's ingest. Missing prices mean Kroger's API returned the SKU without a price field at that location — it may be out of stock, not carried, or a data-feed gap.
+    </p>
+    <div id="catalog" class="loading">Loading…</div>
 
     <div class="footer">
         <p>Linear program: minimize daily $ subject to RDAs/ULs (NIH ODS, adult M 31–50), per-food serving caps, and dietary-mode exclusions. Solved with HiGHS via <code>scipy.optimize.linprog</code>.</p>
@@ -417,6 +441,60 @@
                        k => { STATE.variant = k; render(); });
         }
 
+        function renderCatalog() {
+            const host = document.getElementById('catalog');
+            const catalog = DATA.catalog || [];
+            const locations = DATA.locations || [];
+            if (!catalog.length || !locations.length) {
+                host.innerHTML = '<p style="color:#8a7d6a;">—</p>';
+                return;
+            }
+
+            const priceCell = p => {
+                if (p == null) return '<td class="num muted">—</td>';
+                const reg = fmtMoney(p.effective ?? p.regular);
+                const promo = (p.promo && p.promo > 0 && p.effective === p.promo)
+                    ? ` <span style="color:#ff9800; font-weight:700;">•</span>` : '';
+                return `<td class="num">${reg}${promo}</td>`;
+            };
+            const unit = c => {
+                if (c.kind === 'supplement') {
+                    return `${c.count} tab`;
+                }
+                const g = c.unit_grams;
+                if (g >= 1000) return (g / 1000).toFixed(1) + ' kg';
+                if (g >= 100) return Math.round(g) + ' g';
+                return g.toFixed(0) + ' g';
+            };
+
+            const locHeaders = locations.map(l =>
+                `<th class="num" title="${l.display}">${l.region}</th>`).join('');
+
+            const rows = catalog.map(c => {
+                const tags = (c.dietary_categories || [])
+                    .filter(t => t !== 'supplement')
+                    .join(', ');
+                const cls = c.kind === 'supplement' ? 'is-supplement' : '';
+                const cells = locations.map(l => priceCell(c.prices_by_region[l.region])).join('');
+                return `<tr class="${cls}">
+                    <td class="name">${c.name}</td>
+                    <td class="tag">${tags}</td>
+                    <td class="num muted">${unit(c)}</td>
+                    ${cells}
+                </tr>`;
+            }).join('');
+
+            host.innerHTML = `<div class="table-scroll"><table>
+                <thead><tr>
+                    <th>SKU</th>
+                    <th>Category</th>
+                    <th class="num">Unit</th>
+                    ${locHeaders}
+                </tr></thead>
+                <tbody>${rows}</tbody>
+            </table></div>`;
+        }
+
         function render() {
             renderModePills(STATE.mode);
             const regions = [...new Set(DATA.solutions.map(s => s.location_region))];
@@ -428,6 +506,7 @@
             renderSummary(sol || {location_display:'—'});
             renderBasket(sol);
             renderNutrients(sol);
+            renderCatalog();
         }
 
         function loadFrom(url) {

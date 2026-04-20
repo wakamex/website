@@ -213,7 +213,7 @@
     <div class="footer">
         <p>Linear program: minimize daily $ subject to RDAs/ULs (NIH ODS, adult M 31–50), per-food serving caps, and dietary-mode exclusions. Solved with HiGHS via <code>scipy.optimize.linprog</code>.</p>
         <p>Prices: <a href="https://developer.kroger.com/">Kroger Public Products API</a>, refreshed daily at the listed locationIds. Nutrients: <a href="https://fdc.nal.usda.gov/">USDA FoodData Central</a>. Targets: <a href="https://ods.od.nih.gov/HealthInformation/Dietary_Reference_Intakes.aspx">NIH ODS DRIs</a>.</p>
-        <p>Limits: Kroger only; promo prices may be loyalty-card-gated; assumes a single adult profile; ignores cooking, waste, bioavailability, palatability beyond a 500 g/day cap.</p>
+        <p>Limits: Kroger only; promo prices may be loyalty-card-gated; assumes a single adult profile; ignores cooking, waste, bioavailability, and palatability. No per-food serving cap — Stigler-pure LP, so vegan baskets include ~1.5 L of fortified soy milk per day to hit the vitamin D floor from plant food alone.</p>
         <p>The <b>food + pills</b> variant adds Kroger-brand multivitamin, B12, and calcium+D3 tablets priced via the same API. Supplement nutrients come from the Supplement Facts label (FDC doesn't cover pills). The cost delta between variants is the supplement arbitrage — typically $1–2/day.</p>
         <p><a href="https://github.com/wakamex/diet">Source code</a></p>
     </div>

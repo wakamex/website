@@ -282,12 +282,33 @@
             return DATA.solutions.some(s => s.variant === 'with_supplements');
         }
 
+        function labelFor(nutrientId) {
+            const tgt = (DATA.nutrient_targets || []).find(t => t.nutrient === nutrientId);
+            return (tgt && tgt.label) || nutrientId;
+        }
+
         function renderBanner(sol) {
             const host = document.getElementById('banner-host');
             host.innerHTML = '';
             if (!sol) return;
             if (sol.status === 'infeasible') {
-                host.innerHTML = `<div class="banner error">No feasible diet for <b>${MODE_LABELS[sol.mode]}</b> at <b>${sol.location_region}</b>. ${sol.message || 'A nutrient target cannot be met from the available SKUs at the per-food serving cap.'}</div>`;
+                const diag = sol.diagnosis || [];
+                let detail;
+                if (diag.length === 0) {
+                    detail = 'A nutrient target cannot be met from the available SKUs.';
+                } else {
+                    const rows = diag.map(d => {
+                        const label = labelFor(d.nutrient);
+                        const verb = d.kind === 'shortfall' ? 'short' : 'over';
+                        const pct = d.pct_of_target != null ? ` (${d.pct_of_target}%)` : '';
+                        // 1 decimal for g/mg, 2 for mcg amounts below 10, else round.
+                        const amt = d.amount < 10 ? d.amount.toFixed(2)
+                                    : Math.round(d.amount);
+                        return `<li><b>${label}</b>: ${amt} ${d.unit} ${verb}${pct}</li>`;
+                    }).join('');
+                    detail = `Blocking nutrients:<ul style="margin: 6px 0 0 20px; padding: 0;">${rows}</ul>`;
+                }
+                host.innerHTML = `<div class="banner error"><b>No feasible ${MODE_LABELS[sol.mode]} diet at ${sol.location_region}</b> from Kroger SKUs priced today.<br>${detail}</div>`;
             } else if (sol.status !== 'optimal') {
                 host.innerHTML = `<div class="banner">Solver returned <b>${sol.status}</b>: ${sol.message || ''}</div>`;
             }

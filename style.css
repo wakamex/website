@@ -176,3 +176,9 @@ a:hover { border-bottom-color: #e8dcc0; }
     display: flex;
     gap: 24px;
 }
+
+@media (max-width: 600px) {
+    body { padding: 12px 10px; font-size: 0.875rem; }
+    h1 { font-size: 1.5rem; }
+    .links { gap: 16px; flex-wrap: wrap; }
+}

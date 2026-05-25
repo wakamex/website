@@ -187,9 +187,11 @@
         function calcMult(pct, resetsAt, periodHours) {
             if (!resetsAt || !pct) return null;
             var remaining = (new Date(resetsAt) - new Date()) / 3600000;
-            var elapsed = periodHours - remaining;
-            if (elapsed <= 0) return null;
-            return pct / ((elapsed / periodHours) * 100);
+            if (remaining <= 0) return null;
+            var timeLeft = (remaining / periodHours) * 100;
+            var budgetLeft = 100 - pct;
+            if (budgetLeft <= 0) return Infinity;
+            return timeLeft / budgetLeft;
         }
 
         function fmtReset(iso) {
@@ -215,12 +217,12 @@
         function meterRow(label, pct, mult, resetsAt, periodHours) {
             var cls = mult !== null ? multClass(mult) : 'ok';
             var fillW = Math.min(pct, 100);
-            var multStr = mult !== null ? mult.toFixed(2) + 'x' : '';
+            var multStr = mult === null ? '' : (mult >= 10 ? '>10x' : mult.toFixed(2) + 'x');
             var reset = fmtReset(resetsAt);
             return '<div class="meter-row">' +
                 '<div class="meter-header">' +
                     '<span class="meter-label">' + label + '</span>' +
-                    '<span class="meter-pace ' + cls + '">' + (multStr ? 'Pace: ' + multStr : '') + '</span>' +
+                    '<span class="meter-pace ' + cls + '">' + (multStr ? 'Burn: ' + multStr : '') + '</span>' +
                 '</div>' +
                 '<div class="meter-bar"><div class="meter-fill ' + cls + '" style="width:' + fillW + '%"></div></div>' +
                 '<div class="meter-footer">' +

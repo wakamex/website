@@ -64,15 +64,17 @@
         function calcMult(pct, resetsAt, periodHours) {
             if (!resetsAt || !pct) return null;
             var remaining = (new Date(resetsAt) - new Date()) / 3600000;
-            var elapsed = periodHours - remaining;
-            if (elapsed <= 0) return null;
-            return pct / ((elapsed / periodHours) * 100);
+            if (remaining <= 0) return null;
+            var timeLeft = (remaining / periodHours) * 100;
+            var budgetLeft = 100 - pct;
+            if (budgetLeft <= 0) return Infinity;
+            return timeLeft / budgetLeft;
         }
 
         function meter(label, pct, mult, plan) {
             var cls = mult !== null ? multClass(mult) : 'ok';
             var fillW = Math.min(pct, 100);
-            var multStr = mult !== null ? mult.toFixed(1) + 'x' : '';
+            var multStr = mult === null ? '' : (mult >= 10 ? '>10x' : mult.toFixed(1) + 'x');
             var planStr = plan || '';
             return '<span class="meter">' +
                 '<span class="meter-name">' + label + '</span>' +
@@ -83,7 +85,7 @@
 
         fetch('/usage.json').then(function(r) { return r.json(); }).then(function(d) {
             var el = document.getElementById('meters');
-            var html = '<div class="meters-title"><span>Weekly</span><span>Pace</span></div><div class="meters-body">';
+            var html = '<div class="meters-title"><span>Weekly</span><span>Burn</span></div><div class="meters-body">';
 
             if (d.claude && d.claude['7d']) {
                 var c = d.claude;

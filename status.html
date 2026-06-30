@@ -47,7 +47,7 @@
 
         .layout {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(3, 1fr);
             gap: 8px;
         }
 
@@ -124,7 +124,7 @@
             color: #7a6e5e;
             margin-top: 8px;
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(3, 1fr);
             gap: 8px;
         }
         .footer-cell {
@@ -138,8 +138,9 @@
         .footer-row a:hover { color: #b6aa99; }
         .footer-row .right { text-align: right; }
 
-        @media (max-width: 500px) {
+        @media (max-width: 760px) {
             .layout { grid-template-columns: 1fr; }
+            .footer-row { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -169,11 +170,22 @@
                 <span class="dim">no data</span>
             </div>
         </div>
+
+        <div class="panel" id="agy-panel">
+            <div class="panel-title">
+                <span>Agy</span>
+                <span id="agy-plan" class="dim">—</span>
+            </div>
+            <div class="panel-body" id="agy-body">
+                <span class="dim">no data</span>
+            </div>
+        </div>
     </div>
 
     <div class="footer-row">
         <span class="footer-cell"><a href="https://github.com/wakamex/ccusage">ccusage</a><span id="claude-updated"></span></span>
         <span class="footer-cell"><a href="https://github.com/wakamex/codex-cli-usage">codex-cli-usage</a><span id="codex-updated"></span></span>
+        <span class="footer-cell"><a href="https://github.com/wakamex/agy-usage">agy-usage</a><span id="agy-updated"></span></span>
     </div>
 
     <script>
@@ -232,6 +244,21 @@
                 '</div>';
         }
 
+        function agyPeriodHours(bucket) {
+            var win = String(bucket.window || '').toLowerCase();
+            var name = String(bucket.display_name || '').toLowerCase();
+            if (win === '5h' || name.indexOf('five hour') >= 0) return 5;
+            if (win === 'weekly' || win === '1w' || win === '7d' || name.indexOf('weekly') >= 0) return 168;
+            return null;
+        }
+
+        function agyLabel(group, bucket) {
+            var groupName = String(group.display_name || '').replace(/ models$/i, '');
+            var bucketName = String(bucket.display_name || 'Quota');
+            if (!groupName || groupName.toLowerCase() === 'quota') return bucketName;
+            return groupName + ' · ' + bucketName;
+        }
+
         fetch('/usage.json').then(function(r) { return r.json(); }).then(function(d) {
             if (d.claude) {
                 var c = d.claude;
@@ -288,8 +315,31 @@
                 document.getElementById('codex-body').innerHTML = html || '<span class="dim">no data</span>';
                 document.getElementById('codex-updated').textContent = 'updated ' + fmtAge(x.updated_at);
             }
+
+            if (d.agy) {
+                var a = d.agy;
+                document.getElementById('agy-plan').textContent = a.plan || '—';
+                var html = '';
+                if (a.quota_summary && a.quota_summary.groups) {
+                    a.quota_summary.groups.forEach(function(group) {
+                        (group.buckets || []).forEach(function(bucket) {
+                            if (bucket.disabled || bucket.remaining_pct === null || bucket.remaining_pct === undefined) return;
+                            var pct = Math.max(0, 100 - bucket.remaining_pct);
+                            var periodHours = agyPeriodHours(bucket);
+                            var m = periodHours ? calcMult(pct, bucket.reset_time, periodHours) : null;
+                            html += meterRow(agyLabel(group, bucket), pct, m, bucket.reset_time, periodHours);
+                        });
+                    });
+                } else if (a.quota_summary_error) {
+                    html = '<span class="dim">' + a.quota_summary_error + '</span>';
+                }
+                document.getElementById('agy-body').innerHTML = html || '<span class="dim">no quota</span>';
+                document.getElementById('agy-updated').textContent = 'updated ' + fmtAge(a.updated_at);
+            }
         }).catch(function() {
             document.getElementById('claude-body').innerHTML = '<span class="dim">offline</span>';
+            document.getElementById('codex-body').innerHTML = '<span class="dim">offline</span>';
+            document.getElementById('agy-body').innerHTML = '<span class="dim">offline</span>';
         });
     })();
     </script>

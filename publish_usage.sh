@@ -2,13 +2,14 @@
 # Generate usage.json from daemon caches and deploy to server
 CLAUDE=~/.claude/usage-limits.json
 CODEX=~/.codex/usage-limits.json
+AGY=~/.gemini/antigravity-cli/usage-limits.json
 OUT=/tmp/usage.json
 
 publish() {
     python3 -c "
 import json, sys, pathlib
 out = {}
-for key, path in [('claude', '$CLAUDE'), ('codex', '$CODEX')]:
+for key, path in [('claude', '$CLAUDE'), ('codex', '$CODEX'), ('agy', '$AGY')]:
     p = pathlib.Path(path)
     if p.exists():
         out[key] = json.loads(p.read_text())
@@ -22,7 +23,7 @@ json.dump(out, sys.stdout)
 
 if [ "$1" = "-daemon" ]; then
     publish
-    inotifywait -m -e close_write "$CLAUDE" "$CODEX" 2>/dev/null | while read -r _dir _event _file; do
+    inotifywait -m -e close_write "$CLAUDE" "$CODEX" "$AGY" 2>/dev/null | while read -r _dir _event _file; do
         # Coalesce near-simultaneous cache writes from both daemons.
         sleep 1
         publish

@@ -18,8 +18,14 @@
 </head>
 <body>
     <a href="/status.html" class="meters-link"><div class="meters" id="meters"></div></a>
+    <div class="links links-top">
+        <a href="https://github.com/wakamex">GitHub</a>
+        <a href="https://x.com/mihai673">Twitter</a>
+        <a href="/resume.html">Resume</a>
+        <a href="/blog.html">Blog</a>
+        <a href="/status.html">Status</a>
+    </div>
     <h1>Mihai Cosma</h1>
-    <p class="tagline">Emergence through chaos and order.</p>
 
     <h2>Agent Harnesses</h2>
     <p class="section-note">Orchestration, memory, communication architectures</p>
@@ -53,65 +59,6 @@
         <li><a href="https://github.com/wakamex/wakterm">wakterm</a> fork of WezTerm that makes Claude/Codex/Gemini/OpenCode first-class terminal citizens. Agent lifecycle CLI, turn-state tracking, session persistence, and 26 upstream bug fixes. The terminal layer underneath panetone.</li>
     </ul>
 
-    <script>
-    (function() {
-        function multClass(m) {
-            if (m < 0.8) return 'ok';
-            if (m <= 1.0) return 'warn';
-            return 'over';
-        }
-
-        function calcMult(pct, resetsAt, periodHours) {
-            if (!resetsAt || !pct) return null;
-            var remaining = (new Date(resetsAt) - new Date()) / 3600000;
-            if (remaining <= 0) return null;
-            var timeLeft = (remaining / periodHours) * 100;
-            var budgetLeft = 100 - pct;
-            if (budgetLeft <= 0) return Infinity;
-            return timeLeft / budgetLeft;
-        }
-
-        function meter(label, pct, mult, plan) {
-            var cls = mult !== null ? multClass(mult) : 'ok';
-            var fillW = Math.min(pct, 100);
-            var multStr = mult === null ? '' : (mult >= 10 ? '>10x' : mult.toFixed(1) + 'x');
-            var planStr = plan || '';
-            return '<span class="meter">' +
-                '<span class="meter-name">' + label + '</span>' +
-                '<span class="meter-bar"><span class="meter-fill ' + cls + '" style="width:' + fillW + '%"></span><span class="meter-plan">' + planStr + '</span></span>' +
-                '<span class="meter-mult ' + cls + '">' + multStr + '</span>' +
-                '</span>';
-        }
-
-        fetch('/usage.json').then(function(r) { return r.json(); }).then(function(d) {
-            var el = document.getElementById('meters');
-            var html = '<div class="meters-title"><span>Weekly</span><span>Burn</span></div><div class="meters-body">';
-
-            if (d.claude && d.claude['7d']) {
-                var c = d.claude;
-                var m = calcMult(c['7d'].pct, c['7d'].resets_at, 168);
-                html += meter('claude', c['7d'].pct, m, c.plan);
-            }
-
-            if (d.codex && d.codex['7d']) {
-                var x = d.codex;
-                var m = calcMult(x['7d'].pct, x['7d'].resets_at, 168);
-                html += meter('codex', x['7d'].pct, m, x.plan);
-            } else {
-                html += meter('codex', 0, null);
-            }
-
-            html += '</div>';
-            el.innerHTML = html;
-        }).catch(function() {});
-    })();
-    </script>
-
-    <div class="links">
-        <a href="https://github.com/wakamex">GitHub</a>
-        <a href="https://x.com/mihai673">Twitter</a>
-        <a href="/resume.html">Resume</a>
-        <a href="/status.html">Status</a>
-    </div>
+    <script src="/meters.js"></script>
 </body>
 </html>

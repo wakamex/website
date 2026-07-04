@@ -269,14 +269,19 @@
                     var m = calcMult(c['5h'].pct, c['5h'].resets_at, 5);
                     html += meterRow('Session (5h)', c['5h'].pct, m, c['5h'].resets_at, 5);
                 }
-                if (c['7d']) {
-                    var m = calcMult(c['7d'].pct, c['7d'].resets_at, 168);
-                    html += meterRow('Week (all models)', c['7d'].pct, m, c['7d'].resets_at, 168);
-                }
-                if (c['7d_sonnet']) {
-                    var m = calcMult(c['7d_sonnet'].pct, c['7d_sonnet'].resets_at, 168);
-                    html += meterRow('Week (Sonnet)', c['7d_sonnet'].pct, m, c['7d_sonnet'].resets_at, 168);
-                }
+                // Render the weekly bucket plus any per-model variant (7d_fable, 7d_opus, ...) dynamically.
+                Object.keys(c).filter(function(k) {
+                    return k === '7d' || k.indexOf('7d_') === 0;
+                }).sort(function(a, b) {
+                    return a.length - b.length || (a < b ? -1 : 1);
+                }).forEach(function(k) {
+                    var b = c[k];
+                    if (!b || b.pct === null || b.pct === undefined) return;
+                    var model = k.slice(3);
+                    var label = model ? 'Week (' + model.charAt(0).toUpperCase() + model.slice(1) + ')' : 'Week (all models)';
+                    var m = calcMult(b.pct, b.resets_at, 168);
+                    html += meterRow(label, b.pct, m, b.resets_at, 168);
+                });
                 if (c.extra_usage && c.extra_usage.is_enabled) {
                     var used = c.extra_usage.used_credits || 0;
                     var limit = c.extra_usage.monthly_limit || 1;

@@ -307,6 +307,7 @@
                 }
                 if (x.additional) {
                     x.additional.forEach(function(a) {
+                        if (/spark/i.test(a.name || '')) return;
                         if (a.primary) {
                             var m = calcMult(a.primary.pct, a.primary.resets_at, 5);
                             html += meterRow(a.name + ' (5h)', a.primary.pct, m, a.primary.resets_at, 5);

@@ -46,6 +46,25 @@
         return null;
     }
 
+    function codexWindowSeconds(bucket, fallback) {
+        var seconds = Number(bucket && bucket.window_secs);
+        return isFinite(seconds) && seconds > 0 ? seconds : fallback;
+    }
+
+    function codexWeeklyBucket(data) {
+        var modern = data.schema_version >= 2 || data.primary || data.secondary;
+        var specs = modern
+            ? [['primary', null], ['secondary', null]]
+            : [['5h', 18000], ['7d', 604800]];
+        for (var i = 0; i < specs.length; i++) {
+            var bucket = data[specs[i][0]];
+            if (!bucket) continue;
+            var seconds = codexWindowSeconds(bucket, specs[i][1]);
+            if (seconds && Math.abs(seconds - 604800) / 604800 <= 0.1) return bucket;
+        }
+        return null;
+    }
+
     var el = document.getElementById('meters');
     if (!el) return;
 
@@ -58,10 +77,12 @@
             html += meter('claude', c['7d'].pct, m, c.plan);
         }
 
-        if (d.codex && d.codex['7d']) {
+        if (d.codex && codexWeeklyBucket(d.codex)) {
             var x = d.codex;
-            var m = calcMult(x['7d'].pct, x['7d'].resets_at, 168);
-            html += meter('codex', x['7d'].pct, m, x.plan);
+            var b = codexWeeklyBucket(x);
+            var periodHours = codexWindowSeconds(b, 604800) / 3600;
+            var m = calcMult(b.pct, b.resets_at, periodHours);
+            html += meter('codex', b.pct, m, x.plan);
         } else {
             html += meter('codex', 0, null);
         }

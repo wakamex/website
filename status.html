@@ -259,6 +259,45 @@
             return groupName + ' · ' + bucketName;
         }
 
+        function codexDurationSeconds(bucket, fallback) {
+            var seconds = Number(bucket && bucket.window_secs);
+            return isFinite(seconds) && seconds > 0 ? seconds : fallback;
+        }
+
+        function codexDurationLabel(seconds) {
+            if (!seconds) return '';
+            if (seconds % 604800 === 0) return (seconds / 604800) + 'w';
+            if (seconds % 86400 === 0) return (seconds / 86400) + 'd';
+            if (seconds % 3600 === 0) return (seconds / 3600) + 'h';
+            if (seconds % 60 === 0) return (seconds / 60) + 'm';
+            return seconds + 's';
+        }
+
+        function codexWindowLabel(kind, seconds) {
+            var duration = codexDurationLabel(seconds);
+            if (Math.abs(seconds - 18000) / 18000 <= 0.1) return 'Session (' + duration + ')';
+            if (Math.abs(seconds - 604800) / 604800 <= 0.1) return 'Week (all models)';
+            return kind.charAt(0).toUpperCase() + kind.slice(1) + (duration ? ' (' + duration + ')' : '');
+        }
+
+        function codexWindows(data) {
+            var windows = [];
+            var modern = data.schema_version >= 2 || data.primary || data.secondary;
+            var specs = modern
+                ? [['primary', null], ['secondary', null]]
+                : [['5h', 18000], ['7d', 604800]];
+            specs.forEach(function(spec) {
+                var bucket = data[spec[0]];
+                if (!bucket || bucket.pct === null || bucket.pct === undefined) return;
+                windows.push({
+                    kind: spec[0],
+                    bucket: bucket,
+                    seconds: codexDurationSeconds(bucket, spec[1])
+                });
+            });
+            return windows;
+        }
+
         fetch('/usage.json').then(function(r) { return r.json(); }).then(function(d) {
             if (d.claude) {
                 var c = d.claude;
@@ -297,25 +336,25 @@
                 var x = d.codex;
                 document.getElementById('codex-plan').textContent = x.plan || '—';
                 var html = '';
-                if (x['5h']) {
-                    var m = calcMult(x['5h'].pct, x['5h'].resets_at, 5);
-                    html += meterRow('Session (5h)', x['5h'].pct, m, x['5h'].resets_at, 5);
-                }
-                if (x['7d']) {
-                    var m = calcMult(x['7d'].pct, x['7d'].resets_at, 168);
-                    html += meterRow('Week (all models)', x['7d'].pct, m, x['7d'].resets_at, 168);
-                }
+                codexWindows(x).forEach(function(window) {
+                    var b = window.bucket;
+                    var periodHours = window.seconds ? window.seconds / 3600 : null;
+                    var m = periodHours ? calcMult(b.pct, b.resets_at, periodHours) : null;
+                    html += meterRow(codexWindowLabel(window.kind, window.seconds), b.pct, m, b.resets_at, periodHours);
+                });
                 if (x.additional) {
                     x.additional.forEach(function(a) {
                         if (/spark/i.test(a.name || '')) return;
-                        if (a.primary) {
-                            var m = calcMult(a.primary.pct, a.primary.resets_at, 5);
-                            html += meterRow(a.name + ' (5h)', a.primary.pct, m, a.primary.resets_at, 5);
-                        }
-                        if (a.secondary) {
-                            var m = calcMult(a.secondary.pct, a.secondary.resets_at, 168);
-                            html += meterRow(a.name + ' (7d)', a.secondary.pct, m, a.secondary.resets_at, 168);
-                        }
+                        ['primary', 'secondary'].forEach(function(kind) {
+                            var b = a[kind];
+                            if (!b || b.pct === null || b.pct === undefined) return;
+                            var seconds = codexDurationSeconds(b, null);
+                            var periodHours = seconds ? seconds / 3600 : null;
+                            var m = periodHours ? calcMult(b.pct, b.resets_at, periodHours) : null;
+                            var duration = codexDurationLabel(seconds);
+                            var label = a.name + (duration ? ' (' + duration + ')' : '');
+                            html += meterRow(label, b.pct, m, b.resets_at, periodHours);
+                        });
                     });
                 }
                 document.getElementById('codex-body').innerHTML = html || '<span class="dim">no data</span>';

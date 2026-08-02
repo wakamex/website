@@ -304,7 +304,9 @@
                 document.getElementById('claude-plan').textContent = c.plan || '—';
 
                 var html = '';
-                if (c['5h']) {
+                if (c.session) {
+                    html += meterRow('Session', c.session.pct, null, c.session.resets_at, null);
+                } else if (c['5h']) {
                     var m = calcMult(c['5h'].pct, c['5h'].resets_at, 5);
                     html += meterRow('Session (5h)', c['5h'].pct, m, c['5h'].resets_at, 5);
                 }

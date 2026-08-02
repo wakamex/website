@@ -298,37 +298,50 @@
             return windows;
         }
 
+        function claudeUnavailableHint(data) {
+            if (!data || data.status !== 'unavailable' || !data.unavailable) return null;
+            if (data.unavailable.code === 'oauth_not_allowed_for_organization') {
+                return 'no active subscription or organization OAuth disabled';
+            }
+            return 'usage unavailable';
+        }
+
         fetch('/usage.json').then(function(r) { return r.json(); }).then(function(d) {
             if (d.claude) {
                 var c = d.claude;
                 document.getElementById('claude-plan').textContent = c.plan || '—';
 
                 var html = '';
-                if (c.session) {
-                    html += meterRow('Session', c.session.pct, null, c.session.resets_at, null);
-                } else if (c['5h']) {
-                    var m = calcMult(c['5h'].pct, c['5h'].resets_at, 5);
-                    html += meterRow('Session (5h)', c['5h'].pct, m, c['5h'].resets_at, 5);
-                }
-                // Render the weekly bucket plus any per-model variant (7d_fable, 7d_opus, ...) dynamically.
-                Object.keys(c).filter(function(k) {
-                    return k === '7d' || k.indexOf('7d_') === 0;
-                }).sort(function(a, b) {
-                    return a.length - b.length || (a < b ? -1 : 1);
-                }).forEach(function(k) {
-                    var b = c[k];
-                    if (!b || b.pct === null || b.pct === undefined) return;
-                    var model = k.slice(3);
-                    var label = model ? 'Week (' + model.charAt(0).toUpperCase() + model.slice(1) + ')' : 'Week (all models)';
-                    var m = calcMult(b.pct, b.resets_at, 168);
-                    html += meterRow(label, b.pct, m, b.resets_at, 168);
-                });
-                if (c.extra_usage && c.extra_usage.is_enabled) {
-                    var used = c.extra_usage.used_credits || 0;
-                    var limit = c.extra_usage.monthly_limit || 1;
-                    var pct = (used / limit) * 100;
-                    html += '<div class="status-row"><span class="dim">Extra usage</span><span>$' +
-                        (used / 100).toFixed(2) + ' / $' + (limit / 100).toFixed(2) + '</span></div>';
+                var unavailable = claudeUnavailableHint(c);
+                if (unavailable) {
+                    html = '<span class="dim">usage unavailable: ' + unavailable + '</span>';
+                } else {
+                    if (c.session) {
+                        html += meterRow('Session', c.session.pct, null, c.session.resets_at, null);
+                    } else if (c['5h']) {
+                        var m = calcMult(c['5h'].pct, c['5h'].resets_at, 5);
+                        html += meterRow('Session (5h)', c['5h'].pct, m, c['5h'].resets_at, 5);
+                    }
+                    // Render the weekly bucket plus any per-model variant (7d_fable, 7d_opus, ...) dynamically.
+                    Object.keys(c).filter(function(k) {
+                        return k === '7d' || k.indexOf('7d_') === 0;
+                    }).sort(function(a, b) {
+                        return a.length - b.length || (a < b ? -1 : 1);
+                    }).forEach(function(k) {
+                        var b = c[k];
+                        if (!b || b.pct === null || b.pct === undefined) return;
+                        var model = k.slice(3);
+                        var label = model ? 'Week (' + model.charAt(0).toUpperCase() + model.slice(1) + ')' : 'Week (all models)';
+                        var m = calcMult(b.pct, b.resets_at, 168);
+                        html += meterRow(label, b.pct, m, b.resets_at, 168);
+                    });
+                    if (c.extra_usage && c.extra_usage.is_enabled) {
+                        var used = c.extra_usage.used_credits || 0;
+                        var limit = c.extra_usage.monthly_limit || 1;
+                        var pct = (used / limit) * 100;
+                        html += '<div class="status-row"><span class="dim">Extra usage</span><span>$' +
+                            (used / 100).toFixed(2) + ' / $' + (limit / 100).toFixed(2) + '</span></div>';
+                    }
                 }
                 document.getElementById('claude-body').innerHTML = html || '<span class="dim">no buckets</span>';
                 document.getElementById('claude-updated').textContent = 'updated ' + fmtAge(c.updated_at);

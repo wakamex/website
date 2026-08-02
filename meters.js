@@ -65,13 +65,19 @@
         return null;
     }
 
+    function claudeUnavailable(data) {
+        return data && data.status === 'unavailable' && data.unavailable;
+    }
+
     var el = document.getElementById('meters');
     if (!el) return;
 
     fetch('/usage.json').then(function(r) { return r.json(); }).then(function(d) {
         var html = '<div class="meters-title"><span>Weekly</span><span>Burn</span></div><div class="meters-body">';
 
-        if (d.claude && d.claude['7d']) {
+        if (claudeUnavailable(d.claude)) {
+            html += meter('claude', 0, null, 'unavailable');
+        } else if (d.claude && d.claude['7d']) {
             var c = d.claude;
             var m = calcMult(c['7d'].pct, c['7d'].resets_at, 168);
             html += meter('claude', c['7d'].pct, m, c.plan);

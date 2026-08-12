@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>eBay GPU market - RTX 3090 and 3080</title>
+  <meta name="description" content="Recent eBay RTX 3090 and standard RTX 3080 sales, converted to Canadian dollars with displayed shipping included.">
+  <style>
+    @font-face {
+      font-family: "D2Coding";
+      src: url("/D2CodingLigature.ttf") format("truetype");
+      font-display: swap;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    :root {
+      --background: #040506;
+      --panel: #0a0908;
+      --text: #b6aa99;
+      --emphasis: #e0e0e0;
+      --supporting: #a69987;
+      --quiet: #776f64;
+      --accent: #ff9800;
+      --section-border: #6b5a35;
+      --footer-border: #8a7d6a;
+      --link: #e8dcc0;
+      --green: #78a36a;
+    }
+
+    html { background: var(--background); color-scheme: dark; }
+    body {
+      margin: 0;
+      padding: 20px 24px;
+      background: var(--background);
+      color: var(--text);
+      font-family: "D2Coding", monospace;
+      font-size: 1rem;
+      font-weight: normal;
+      line-height: 1.4;
+    }
+
+    a {
+      color: var(--link);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(232, 220, 192, 0.4);
+      transition: border-color 0.2s ease;
+    }
+    a:hover { border-bottom-color: var(--link); }
+    .back { display: inline-block; margin-bottom: 10px; color: var(--supporting); }
+    h1 {
+      margin: 0;
+      color: var(--emphasis);
+      font-size: 2.5rem;
+      font-weight: normal;
+      line-height: 1.1;
+    }
+    .tagline { margin: 4px 0 0; color: var(--supporting); }
+    .summary { margin: 8px 0 0; }
+    .summary span { color: var(--link); }
+    h2 {
+      margin: 16px 0 4px;
+      padding-top: 16px;
+      border-top: 1px solid var(--section-border);
+      color: var(--accent);
+      font-size: 0.95rem;
+      font-weight: normal;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .note { margin: 0 0 10px; color: var(--supporting); }
+    .method-note { max-width: 110ch; }
+
+    .controls { display: flex; gap: 8px; margin: 10px 0 2px; }
+    button {
+      padding: 4px 9px;
+      border: 1px solid var(--section-border);
+      background: transparent;
+      color: var(--supporting);
+      font: inherit;
+      cursor: pointer;
+    }
+    button:hover, button:focus-visible { border-color: var(--link); color: var(--link); outline: none; }
+    button.active { border-color: var(--accent); color: var(--emphasis); background: rgba(255, 152, 0, 0.08); }
+
+    .chart-wrap { position: relative; width: 100%; padding: 8px 0 2px; overflow-x: auto; }
+    #price-plot { display: block; width: 100%; min-width: 700px; height: auto; }
+    .plot-grid { stroke: rgba(107, 90, 53, 0.28); stroke-width: 1; }
+    .plot-axis { stroke: var(--section-border); stroke-width: 1; }
+    .plot-tick, .axis-label, .fit-key {
+      fill: var(--supporting);
+      font-family: "D2Coding", monospace;
+      font-size: 13px;
+      font-weight: normal;
+    }
+    .axis-label { fill: var(--text); font-size: 14px; }
+    .plot-tick.axis-3090, .axis-label.axis-3090 { fill: var(--accent); stroke: none; }
+    .plot-tick.axis-3080, .axis-label.axis-3080 { fill: var(--link); stroke: none; }
+    .plot-tick.axis-4080-32, .axis-label.axis-4080-32 { fill: var(--green); stroke: none; }
+    .plot-axis.axis-3090 { stroke: var(--accent); }
+    .plot-axis.axis-3080 { stroke: var(--link); }
+    .plot-axis.axis-4080-32 { stroke: var(--green); }
+    .model-line { fill: none; stroke-width: 2; opacity: 0.92; }
+    .model-line-3090 { stroke: var(--accent); }
+    .model-line-3080 { stroke: var(--link); }
+    .model-line-4080-32 { stroke: var(--green); }
+    .model-band { stroke: none; opacity: 0.10; }
+    .model-band-3090 { fill: var(--accent); }
+    .model-band-3080 { fill: var(--link); }
+    .model-band-4080-32 { fill: var(--green); }
+    .plot-point { cursor: pointer; outline: none; }
+    .plot-point circle {
+      stroke: var(--background);
+      stroke-width: 1.5;
+      opacity: 0.78;
+      transition: opacity 0.12s ease, stroke-width 0.12s ease;
+    }
+    .plot-point.gpu-3090 circle { fill: var(--accent); }
+    .plot-point.gpu-3080 circle { fill: var(--link); }
+    .plot-point.gpu-4080-32 circle { fill: var(--green); }
+    .plot-point:hover circle, .plot-point.linked-highlight circle {
+      stroke: var(--emphasis);
+      stroke-width: 3;
+      opacity: 1;
+    }
+    .plot-point.selected circle { stroke: var(--green); stroke-width: 4; opacity: 1; }
+    .tooltip {
+      position: fixed;
+      z-index: 20;
+      max-width: 340px;
+      padding: 7px 9px;
+      border: 1px solid var(--footer-border);
+      background: #0b0c0d;
+      color: var(--text);
+      font-size: 0.82rem;
+      line-height: 1.4;
+      pointer-events: none;
+      opacity: 0;
+    }
+    .tooltip.visible { opacity: 1; }
+    .tooltip .value { color: var(--emphasis); }
+
+    .table-wrap { width: 100%; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+    th, td {
+      padding: 5px 10px;
+      border-bottom: 1px solid rgba(107, 90, 53, 0.58);
+      text-align: right;
+      font-weight: normal;
+    }
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: var(--background);
+      color: var(--supporting);
+      font-size: 0.88rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    th:first-child, td:first-child { padding-left: 0; text-align: left; }
+    th:nth-child(3), td:nth-child(3) { color: var(--emphasis); }
+    th:last-child, td:last-child { padding-right: 0; text-align: left; }
+    tbody tr { cursor: pointer; outline: none; }
+    tbody tr:hover, tbody tr.linked-highlight { background: rgba(232, 220, 192, 0.065); }
+    tbody tr.selected { background: rgba(255, 152, 0, 0.10); box-shadow: inset 2px 0 var(--accent); }
+    .gpu-label-3090 { color: var(--accent); }
+    .gpu-label-3080 { color: var(--link); }
+    .gpu-label-4080-32 { color: var(--green); }
+    .listing-title { display: inline-block; max-width: 62ch; overflow: hidden; text-overflow: ellipsis; vertical-align: bottom; }
+    .quiet { color: var(--quiet); }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      margin-top: 28px;
+      padding-top: 12px;
+      border-top: 1px solid var(--footer-border);
+      color: var(--supporting);
+    }
+
+    @media (max-width: 720px) {
+      body { padding: 12px 10px; font-size: 0.875rem; }
+      h1 { font-size: 1.5rem; }
+      footer { display: block; }
+      footer span { display: block; margin-top: 3px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="back" href="/">← mihaicosma.com</a>
+    <h1>eBay GPU market</h1>
+    <p class="tagline">Canadian market prices for used RTX 3090 and 10 GB RTX 3080 cards, plus rare RTX 4080 32 GB mods.</p>
+    <p class="summary" id="summary">Loading sold listings...</p>
+  </header>
+
+  <main>
+    <h2>Private-sale midpoint over time</h2>
+    <p class="note">Item price plus shipping to Canada, converted to CAD.</p>
+    <div class="controls" aria-label="GPU filter">
+      <button type="button" class="active" data-filter="trade">Trade cards</button>
+      <button type="button" data-filter="3090">RTX 3090</button>
+      <button type="button" data-filter="3080">RTX 3080</button>
+      <button type="button" data-filter="4080-32">RTX 4080 32 GB mod</button>
+    </div>
+    <div class="chart-wrap">
+      <svg id="price-plot" viewBox="0 0 1040 500" role="img" aria-label="Private-sale midpoint over time, with separate Canadian-dollar axes for RTX 3090 and RTX 3080"></svg>
+      <div class="tooltip" id="tooltip" role="tooltip"></div>
+    </div>
+
+    <h2>Sold listings</h2>
+    <p class="note">Click a row or point to lock its highlight. Open the title to audit the ended eBay listing.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>GPU</th>
+            <th>Midpoint</th>
+            <th>Buyer cost</th>
+            <th>Seller net</th>
+            <th>Shipping</th>
+            <th>Condition</th>
+            <th>Listing</th>
+          </tr>
+        </thead>
+        <tbody id="sales-body"></tbody>
+      </table>
+    </div>
+
+    <h2>Method and limits</h2>
+    <p class="note method-note" id="method"></p>
+    <p class="note">The seller estimate uses <a href="https://www.ebay.ca/help/selling-fees/selling/selling-fees?id=4822">eBay Canada's non-Store selling fee</a> as its baseline.</p>
+    <p class="note">Buyer geography comes from <a href="https://www.ebay.ca/help/selling/selling-tools/product-research?id=4853">eBay Product Research</a>.</p>
+    <p class="note">The structure is inspired by <a href="https://abcnews.com/538/polling-averages-work/story?id=109364028">FiveThirtyEight's polling average</a>, which blends a responsive exponentially weighted estimate with a smoother LOWESS-like estimate. This page uses a fixed 70/30 mix because each GPU has a small sample, rather than trying to learn a changing blend from limited history.</p>
+  </main>
+
+  <footer>
+    <span id="updated"></span>
+    <span>Taxes, duties and brokerage are excluded.</span>
+  </footer>
+
+  <script src="/gpu-sales-data.js"></script>
+  <script>
+    (() => {
+      const documentData = window.GPU_SALES_DATA;
+      const sales = documentData.sales.map(sale => ({ ...sale, date: new Date(sale.sold_at) }));
+      const trends = Object.fromEntries(documentData.trends.map(trend => [trend.gpu, {
+        ...trend,
+        points: trend.points.map(point => ({ ...point, date: new Date(`${point.date}T00:00:00`) }))
+      }]));
+      const svg = document.getElementById("price-plot");
+      const tbody = document.getElementById("sales-body");
+      const tooltip = document.getElementById("tooltip");
+      const ns = "http://www.w3.org/2000/svg";
+      const money = new Intl.NumberFormat("en-CA", { style: "currency", currency: "CAD", maximumFractionDigits: 0 });
+      const exactMoney = new Intl.NumberFormat("en-CA", { style: "currency", currency: "CAD", minimumFractionDigits: 2 });
+      const day = new Intl.DateTimeFormat("en-CA", { month: "short", day: "numeric", year: "numeric" });
+      let filter = "trade";
+      let selectedId = null;
+      let hoveredId = null;
+
+      const svgNode = (name, attributes = {}, text = "") => {
+        const node = document.createElementNS(ns, name);
+        Object.entries(attributes).forEach(([key, value]) => node.setAttribute(key, value));
+        if (text) node.textContent = text;
+        return node;
+      };
+
+      const gpuName = gpu => gpu === "4080-32" ? "RTX 4080 32 GB mod" : `RTX ${gpu}`;
+      const plotValue = sale => sale.gpu === "4080-32" ? sale.total_cad : sale.midpoint_cad;
+      const visibleSales = () => filter === "trade"
+        ? sales.filter(sale => sale.gpu !== "4080-32")
+        : sales.filter(sale => sale.gpu === filter);
+
+      function niceStep(value) {
+        const power = 10 ** Math.floor(Math.log10(Math.max(value, 1)));
+        const fraction = value / power;
+        const factor = fraction < 1.5 ? 1 : fraction < 3 ? 2 : fraction < 7 ? 5 : 10;
+        return factor * power;
+      }
+
+      function priceDomain(values) {
+        const rawMin = Math.min(...values);
+        const rawMax = Math.max(...values);
+        const span = Math.max(1, rawMax - rawMin);
+        const step = niceStep(span / 6);
+        return {
+          min: Math.floor(rawMin / step) * step,
+          max: Math.ceil(rawMax / step) * step,
+          step
+        };
+      }
+
+      function updateSummary() {
+        const parts = ["3090", "3080"].map(gpu => {
+          const values = documentData.benchmarks[gpu];
+          return `RTX ${gpu} <span>${money.format(values.midpoint_cad)} midpoint</span> (${money.format(values.buyer_cad)} buy · ${money.format(values.seller_cad)} sell)`;
+        });
+        const mod = documentData.benchmarks["4080-32"];
+        if (mod) parts.push(`RTX 4080 32 GB mod <span>${money.format(mod.buyer_cad)} buy</span>`);
+        document.getElementById("summary").innerHTML = `${parts.join(" · ")} · <span>${sales.length}</span> auditable sales`;
+      }
+
+      function renderTable() {
+        const rows = visibleSales().sort((a, b) => b.date - a.date);
+        tbody.innerHTML = rows.map(sale => `
+          <tr data-sale-id="${sale.id}" tabindex="0" aria-selected="false">
+            <td>${day.format(sale.date)}</td>
+            <td class="gpu-label-${sale.gpu}">${gpuName(sale.gpu)}</td>
+            <td>${sale.midpoint_cad == null ? "n/a" : exactMoney.format(sale.midpoint_cad)}</td>
+            <td>${exactMoney.format(sale.total_cad)}</td>
+            <td>${sale.seller_net_cad == null ? "n/a" : exactMoney.format(sale.seller_net_cad)}</td>
+            <td title="${sale.shipping_label}">${sale.shipping_cad ? exactMoney.format(sale.shipping_cad) : "$0.00"}</td>
+            <td>${sale.condition}</td>
+            <td><a class="listing-title" href="${sale.url}" target="_blank" rel="noreferrer" title="${sale.title}">${sale.title}</a></td>
+          </tr>`).join("");
+        bindRows();
+        syncHighlight();
+      }
+
+      function renderPlot() {
+        const rows = visibleSales();
+        svg.replaceChildren();
+        const width = 1040, height = 500;
+        const margin = { left: 88, right: 88, top: 64, bottom: 58 };
+        const innerWidth = width - margin.left - margin.right;
+        const innerHeight = height - margin.top - margin.bottom;
+        const minDate = Math.min(...rows.map(row => row.date.getTime()));
+        const maxDate = Math.max(...rows.map(row => row.date.getTime()));
+        const activeGpus = filter === "trade" ? ["3090", "3080"] : [filter];
+        const x = date => margin.left + ((date.getTime() - minDate) / Math.max(1, maxDate - minDate)) * innerWidth;
+        const domains = Object.fromEntries(activeGpus.map(gpu => {
+          const points = trends[gpu].points.filter(point => point.date.getTime() >= minDate && point.date.getTime() <= maxDate);
+          const values = [
+            ...rows.filter(row => row.gpu === gpu).map(plotValue),
+            ...points.flatMap(point => [point.lower_cad, point.upper_cad])
+          ];
+          return [gpu, priceDomain(values)];
+        }));
+        const y = Object.fromEntries(activeGpus.map(gpu => [gpu, value => {
+          const domain = domains[gpu];
+          return margin.top + (1 - (value - domain.min) / Math.max(1, domain.max - domain.min)) * innerHeight;
+        }]));
+
+        activeGpus.forEach((gpu, axisIndex) => {
+          const domain = domains[gpu];
+          const leftAxis = gpu !== "3080";
+          const axisX = leftAxis ? margin.left : width - margin.right;
+          const labelX = leftAxis ? axisX - 11 : axisX + 11;
+          const anchor = leftAxis ? "end" : "start";
+          const tickCount = Math.round((domain.max - domain.min) / domain.step);
+          for (let i = 0; i <= tickCount; i++) {
+            const value = domain.min + domain.step * i;
+            const py = y[gpu](value);
+            if (axisIndex === 0) svg.append(svgNode("line", { class: "plot-grid", x1: margin.left, y1: py, x2: width - margin.right, y2: py }));
+            svg.append(svgNode("line", { class: `plot-axis axis-${gpu}`, x1: axisX - (leftAxis ? 4 : 0), y1: py, x2: axisX + (leftAxis ? 0 : 4), y2: py }));
+            svg.append(svgNode("text", { class: `plot-tick axis-${gpu}`, x: labelX, y: py + 4, "text-anchor": anchor }, money.format(value)));
+          }
+          svg.append(svgNode("line", { class: `plot-axis axis-${gpu}`, x1: axisX, y1: margin.top, x2: axisX, y2: height - margin.bottom }));
+          const labelPosition = leftAxis ? 18 : width - 18;
+          svg.append(svgNode("text", { class: `axis-label axis-${gpu}`, transform: `translate(${labelPosition} ${height / 2}) rotate(-90)`, "text-anchor": "middle" }, `${gpuName(gpu)} CAD`));
+        });
+        for (let i = 0; i <= 4; i++) {
+          const timestamp = minDate + ((maxDate - minDate) * i / 4);
+          const px = x(new Date(timestamp));
+          svg.append(svgNode("line", { class: "plot-grid", x1: px, y1: margin.top, x2: px, y2: height - margin.bottom }));
+          svg.append(svgNode("text", { class: "plot-tick", x: px, y: height - margin.bottom + 23, "text-anchor": "middle" }, new Intl.DateTimeFormat("en-CA", { month: "short", day: "numeric" }).format(timestamp)));
+        }
+        svg.append(svgNode("line", { class: "plot-axis", x1: margin.left, y1: height - margin.bottom, x2: width - margin.right, y2: height - margin.bottom }));
+        svg.append(svgNode("text", { class: "axis-label", x: width / 2, y: height - 10, "text-anchor": "middle" }, "Sale date"));
+
+        activeGpus.forEach((gpu, index) => {
+          const trend = trends[gpu];
+          const points = trend.points.filter(point => point.date.getTime() >= minDate && point.date.getTime() <= maxDate);
+          if (points.length < 2) return;
+          const lower = points.map((point, pointIndex) => `${pointIndex ? "L" : "M"}${x(point.date).toFixed(1)},${y[gpu](point.lower_cad).toFixed(1)}`).join(" ");
+          const upper = [...points].reverse().map(point => `L${x(point.date).toFixed(1)},${y[gpu](point.upper_cad).toFixed(1)}`).join(" ");
+          svg.append(svgNode("path", { class: `model-band model-band-${gpu}`, d: `${lower} ${upper} Z` }));
+          const path = points.map((point, pointIndex) => `${pointIndex ? "L" : "M"}${x(point.date).toFixed(1)},${y[gpu](point.value_cad).toFixed(1)}`).join(" ");
+          svg.append(svgNode("path", { class: `model-line model-line-${gpu}`, d: path }));
+          const label = svgNode("g", { class: "fit-key", transform: `translate(${width - 235} ${20 + index * 21})` });
+          label.append(svgNode("line", { class: `model-line model-line-${gpu}`, x1: 0, y1: 0, x2: 28, y2: 0 }));
+          const metric = gpu === "4080-32" ? "buy" : "midpoint";
+          label.append(svgNode("text", { x: 36, y: 4 }, `${gpuName(gpu)} ${metric} · ${money.format(trend.latest_cad)} now`));
+          svg.append(label);
+        });
+
+        rows.forEach(sale => {
+          const point = svgNode("g", { class: `plot-point gpu-${sale.gpu}`, "data-sale-id": sale.id, tabindex: 0, role: "button", "aria-label": `${sale.title}, ${exactMoney.format(plotValue(sale))}` });
+          point.append(svgNode("circle", { cx: x(sale.date), cy: y[sale.gpu](plotValue(sale)), r: 5 }));
+          point.addEventListener("mouseenter", event => showTooltip(event, sale));
+          point.addEventListener("mousemove", event => positionTooltip(event));
+          point.addEventListener("mouseleave", hideTooltip);
+          point.addEventListener("focus", event => showTooltip(event, sale));
+          point.addEventListener("blur", hideTooltip);
+          point.addEventListener("click", event => { event.stopPropagation(); toggleSelection(sale.id, true); });
+          point.addEventListener("keydown", event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); toggleSelection(sale.id, true); } });
+          point.addEventListener("mouseenter", () => { hoveredId = sale.id; syncHighlight(); });
+          point.addEventListener("mouseleave", () => { hoveredId = null; syncHighlight(); });
+          svg.append(point);
+        });
+        syncHighlight();
+      }
+
+      function showTooltip(event, sale) {
+        const values = sale.gpu === "4080-32"
+          ? `${exactMoney.format(sale.total_cad)} buyer cost · buy-only series`
+          : `${exactMoney.format(sale.midpoint_cad)} midpoint<br>${exactMoney.format(sale.total_cad)} buyer cost · ${exactMoney.format(sale.seller_net_cad)} seller net`;
+        tooltip.innerHTML = `<span class="value">${gpuName(sale.gpu)} · ${values}</span><br>${sale.title}<br>${day.format(sale.date)} · ${sale.shipping_label}`;
+        tooltip.classList.add("visible");
+        positionTooltip(event);
+      }
+      function positionTooltip(event) {
+        if (!Number.isFinite(event.clientX)) return;
+        const left = Math.min(window.innerWidth - 360, event.clientX + 14);
+        const top = Math.min(window.innerHeight - 110, event.clientY + 14);
+        tooltip.style.left = `${Math.max(8, left)}px`;
+        tooltip.style.top = `${Math.max(8, top)}px`;
+      }
+      function hideTooltip() { tooltip.classList.remove("visible"); }
+
+      function bindRows() {
+        tbody.querySelectorAll("tr[data-sale-id]").forEach(row => {
+          const id = row.dataset.saleId;
+          row.addEventListener("mouseenter", () => { hoveredId = id; syncHighlight(); });
+          row.addEventListener("mouseleave", () => { hoveredId = null; syncHighlight(); });
+          row.addEventListener("click", event => { if (!event.target.closest("a")) toggleSelection(id, false); });
+          row.addEventListener("keydown", event => { if ((event.key === "Enter" || event.key === " ") && !event.target.closest("a")) { event.preventDefault(); toggleSelection(id, false); } });
+        });
+      }
+      function toggleSelection(id, fromPlot) {
+        selectedId = selectedId === id ? null : id;
+        syncHighlight();
+        if (fromPlot && selectedId) tbody.querySelector(`[data-sale-id="${id}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      function syncHighlight() {
+        document.querySelectorAll("[data-sale-id]").forEach(element => {
+          const selected = element.dataset.saleId === selectedId;
+          const linked = element.dataset.saleId === hoveredId || selected;
+          element.classList.toggle("linked-highlight", linked);
+          element.classList.toggle("selected", selected);
+          element.setAttribute("aria-selected", String(selected));
+        });
+      }
+
+      document.querySelectorAll("button[data-filter]").forEach(button => {
+        button.addEventListener("click", () => {
+          filter = button.dataset.filter;
+          selectedId = null;
+          document.querySelectorAll("button[data-filter]").forEach(item => item.classList.toggle("active", item === button));
+          renderPlot();
+          renderTable();
+        });
+      });
+      svg.addEventListener("click", event => { if (event.target === svg) { selectedId = null; syncHighlight(); } });
+
+      const shipping = documentData.seller_estimate.shipping;
+      const shipping3090 = shipping.by_gpu["3090"];
+      const shipping3080 = shipping.by_gpu["3080"];
+      const modCount = sales.filter(sale => sale.gpu === "4080-32").length;
+      document.getElementById("method").textContent = `${documentData.method} For the 3080 and 3090, the plotted line is halfway between modeled buyer cost and estimated seller net; shading spans those two values. Both endpoints use 70% robust local-linear LOWESS on log price and 30% exponentially weighted median. Seller net deducts a 13.6% eBay final value fee, C$0.40 per order and estimated shipping. The 90-day Product Research sample has ${shipping3090.buyer_counts["Canada"] || 0} Canadian and ${shipping3090.buyer_counts["United States"] || 0} US buyers for the 3090 query, and ${shipping3080.buyer_counts["Canada"] || 0} Canadian and ${shipping3080.buyer_counts["United States"] || 0} US buyers for the 3080 query. Those per-GPU weights imply blended shipping of ${money.format(shipping3090.blended_cad)} for a 3090 and ${money.format(shipping3080.blended_cad)} for a 3080. The RTX 4080 32 GB mod is a separate buy-only series based on ${modCount} individual sales found across eBay.ca and an eBay.com cross-check. Three sales are too few for a defensible fit, so its line only connects observed prices. Lots, laptops, desktops and ordinary 16 GB cards are excluded, but seller location is not an inclusion rule. Positive Canada-origin quotes proxy domestic cost; US-to-Canada quotes proxy the reverse route. The seller estimate excludes promoted listings, Store discounts, returns, international surcharges and fee effects from buyer sales tax. The standard RTX 3080 sample means working used 10 GB desktop cards. Accessories, partially working cards, hidden Best Offers and stale results are excluded. Public ended listings can disappear.`;
+      document.getElementById("updated").textContent = `Retrieved ${new Intl.DateTimeFormat("en-CA", { dateStyle: "medium", timeStyle: "short" }).format(new Date(documentData.retrieved_at))}`;
+      updateSummary();
+      renderPlot();
+      renderTable();
+    })();
+  </script>
+</body>
+</html>

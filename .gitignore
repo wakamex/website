@@ -1,3 +1,5 @@
 usage.json
 posts/*.html
 blog.html
+.env
+.private/

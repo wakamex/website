@@ -23,9 +23,43 @@
         <a href="https://x.com/mihai673">Twitter</a>
         <a href="/resume.html">Resume</a>
         <a href="/blog.html">Blog</a>
+        <a href="/autoresearch.html">Autoresearch</a>
         <a href="/status.html">Status</a>
     </div>
     <h1>Mihai Cosma</h1>
+
+    <!-- AUTORESEARCH:START -->
+    <section class="featured-research" aria-labelledby="featured-research-title">
+        <h2 id="featured-research-title">Featured Research</h2>
+        <div class="research-list">
+        <article class="research-entry research-entry-featured">
+            <div class="research-index">CASE 5</div>
+            <div class="research-content">
+                <h3><a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/05-tactics-neural-evaluators.md">Tactics.md neural evaluator optimization</a></h3>
+                <p>Tactics.md used autoresearch to train neural models that evaluated positions inside its game-tree search, testing architecture size, training targets, quantization, and self-play across 435 result bundles. Under the same 10 millisecond move budget, a model that evaluated each position 73 times more slowly still won because its judgments were better, while the model with the best validation loss played worst among matched candidates.</p>
+                <p class="research-meta">2026-04-15 - 2026-05-08 <span aria-hidden="true">//</span> <a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/05-tactics-neural-evaluators.md">read report</a></p>
+            </div>
+        </article>
+        <article class="research-entry research-entry-featured">
+            <div class="research-index">CASE 9</div>
+            <div class="research-content">
+                <h3><a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/09-freetranscribe-gpu-inference.md">FreeTranscribe.org GPU inference optimization</a></h3>
+                <p>FreeTranscribe.org doubled transcription throughput while sharing one RTX 3090 between live production and autoresearch. Error counts stayed unchanged across 295 broad cases and fell from 105 to 103 on a reviewed long-form set.</p>
+                <p class="research-meta">2026-08-06 - 2026-08-08 <span aria-hidden="true">//</span> <a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/09-freetranscribe-gpu-inference.md">read report</a></p>
+            </div>
+        </article>
+        <article class="research-entry research-entry-featured">
+            <div class="research-index">CASE 10</div>
+            <div class="research-content">
+                <h3><a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/10-trading-strategy-search.md">Adaptive quantitative-trading strategy search</a></h3>
+                <p>Quantitative-trading autoresearch sustained 46 agent-led research cycles in eight hours, implementing 39 strategies and retaining 35 development results that passed causal-attribution checks while sealed future data stayed untouched. Shared-capital replay mapped the development tradeoff between profit and volume. Gemini 3.6 Flash remained the historical bandit leader after completing 10 of 10 cycles; in a later panel, GPT-5.6 Luna medium received similar internal ratings to Sol medium at under one-twentieth the API-equivalent cost.</p>
+                <p class="research-meta">2026-08-08 - 2026-08-11 <span aria-hidden="true">//</span> <a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/10-trading-strategy-search.md">read report</a></p>
+            </div>
+        </article>
+        </div>
+        <p class="research-collection-link"><a href="/autoresearch.html">View the full collection (10 cases) <span aria-hidden="true">-&gt;</span></a></p>
+    </section>
+    <!-- AUTORESEARCH:END -->
 
     <h2>Agent Harnesses</h2>
     <p class="section-note">Orchestration, memory, communication architectures</p>
@@ -48,7 +82,7 @@
     <p class="section-note">Novel architectures, reinforcement learning, empirical results</p>
     <ul>
         <li><a href="https://github.com/wakamex/rc">reservoir computing for LLMs</a> adds ESN sidecar to Qwen3.5-0.8B. 3x average exact-match across 23 benchmarks (0.12→0.36) at negligible perplexity cost (+0.3%). Perfect on passkey retrieval, near-perfect on multi-digit arithmetic, strong gains on variable tracking and program tracing. Kicked off with <a href="https://mihaicosma.com/rc.html">/collab</a>.</li>
-        <li><a href="https://github.com/wakamex/mnk">mnk</a>-game AlphaZero-style in Rust shows modest gains from transfer learning across board sizes. Hyperparameter sweeps and 75x speedup over reference Python, but improvements don't stack.</li>
+        <li><a href="https://github.com/wakamex/mnk">mnk</a>-game AlphaZero-style in Rust. Checkpoint transfer worked, but the campaign did not establish an advantage over matched scratch training. Hyperparameter sweeps and 75x speedup over reference Python, but improvements don't stack.</li>
         <li><a href="https://github.com/wakamex/spillage">energy spillage</a> attempt to repurpose ICLR 2026 hallucination metric for test-time tree search. <a href="https://mihaicosma.com/spillage.html">/collab</a> for research design. Found energy spillage is confidence proxy, and underperforms min(log_prob). Killed via predefined go/no-go gates.</li>
     </ul>
 

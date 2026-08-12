@@ -3,6 +3,7 @@ set -e
 cd "$(dirname "$0")"
 
 python3 build_blog.py
+python3 build_autoresearch.py --allow-stale-cache
 
 python3 - <<'PY'
 import json, pathlib

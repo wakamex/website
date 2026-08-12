@@ -15,6 +15,7 @@ LINKS = """    <div class="links links-top">
         <a href="https://x.com/mihai673">Twitter</a>
         <a href="/resume.html">Resume</a>
         <a href="/blog.html">Blog</a>
+        <a href="/autoresearch.html">Autoresearch</a>
         <a href="/status.html">Status</a>
     </div>"""
 

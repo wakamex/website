@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Autoresearch case studies - Mihai Cosma</title>
+    <meta name="description" content="10 chronological field reports on using autoresearch in applied projects, including what worked, what failed, and how the research infrastructure evolved.">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <a href="/status.html" class="meters-link"><div class="meters" id="meters"></div></a>
+    <div class="links links-top">
+        <a href="/">Home</a>
+        <a href="https://github.com/wakamex">GitHub</a>
+        <a href="https://x.com/mihai673">Twitter</a>
+        <a href="/resume.html">Resume</a>
+        <a href="/blog.html">Blog</a>
+        <a href="/autoresearch.html" aria-current="page">Autoresearch</a>
+        <a href="/status.html">Status</a>
+    </div>
+    <main class="autoresearch">
+        <header class="research-header">
+            <p class="research-kicker">AUTORESEARCH / FIELD REPORTS</p>
+            <h1>Autoresearch case studies</h1>
+            <p class="research-description">10 chronological field reports on using autoresearch in applied projects, including what worked, what failed, and how the research infrastructure evolved.</p>
+            <p class="research-overview">10 cases <span aria-hidden="true">//</span> 2026-02-04 - 2026-08-11</p>
+        </header>
+        <div class="research-list research-list-complete">
+        <article class="research-entry" id="case-1">
+            <div class="research-index">CASE 1</div>
+            <div class="research-content">
+                <h2>M,N,K transfer-learning campaign</h2>
+                <p>M,N,K game research used a Rust and CUDA AlphaZero system to test whether a smaller-board checkpoint could improve learning on a larger board. The checkpoint loaded successfully, but the campaign never established a benefit over matched scratch training, and several promising settings produced a worse and more expensive combined result.</p>
+                <dl class="research-facts">
+                    <div><dt>Started</dt><dd>2026-02-04</dd></div>
+                    <div><dt>Ended</dt><dd>2026-02-22</dd></div>
+                    <div><dt>Words</dt><dd>1,379</dd></div>
+                </dl>
+                <p class="research-projects">Projects: <a href="https://github.com/wakamex/mnk">M,N,K game research</a></p>
+                <p class="research-report"><a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/01-mnk-transfer.md">Read report <span aria-hidden="true">-&gt;</span></a></p>
+            </div>
+        </article>
+        <article class="research-entry" id="case-2">
+            <div class="research-index">CASE 2</div>
+            <div class="research-content">
+                <h2>Tactics.md policy and action-node search</h2>
+                <p>Tactics.md used autoresearch to develop and tune its hand-written Greedy and Heuristic agents across more than 24 million simulated games, then test learned action search. One learned model reached 86.7% held-out accuracy but scored only 10% against the simpler Greedy agent because useful actions were pruned before deeper evaluation.</p>
+                <dl class="research-facts">
+                    <div><dt>Started</dt><dd>2026-03-07</dd></div>
+                    <div><dt>Ended</dt><dd>2026-04-07</dd></div>
+                    <div><dt>Words</dt><dd>1,292</dd></div>
+                </dl>
+                <p class="research-projects">Projects: <a href="https://tactics.md/">Tactics.md</a></p>
+                <p class="research-report"><a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/02-tactics-search.md">Read report <span aria-hidden="true">-&gt;</span></a></p>
+            </div>
+        </article>
+        <article class="research-entry" id="case-3">
+            <div class="research-index">CASE 3</div>
+            <div class="research-content">
+                <h2>Tactics.md CPU self-play optimization</h2>
+                <p>Tactics.md used Codex to test 102 interventions on the CPU pipeline generating self-play training games, accelerating turn search and quantized neural evaluation while uncovering eight correctness defects. Narrow component benchmarks repeatedly misled; only full-turn replay and end-to-end self-play could distinguish real speedups from changed game behavior.</p>
+                <dl class="research-facts">
+                    <div><dt>Started</dt><dd>2026-03-10</dd></div>
+                    <div><dt>Ended</dt><dd>2026-03-11</dd></div>
+                    <div><dt>Words</dt><dd>978</dd></div>
+                </dl>
+                <p class="research-projects">Projects: <a href="https://tactics.md/">Tactics.md</a></p>
+                <p class="research-report"><a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/03-tactics-cpu-optimization.md">Read report <span aria-hidden="true">-&gt;</span></a></p>
+            </div>
+        </article>
+        <article class="research-entry" id="case-4">
+            <div class="research-index">CASE 4</div>
+            <div class="research-content">
+                <h2>Gradient Bang headless automation</h2>
+                <p>A Gradient Bang headless client completed live trading, combat, fleet, and exploration workflows and reached contemporaneous visible ranks of 29 in exploration and 27 in trading. Parallel probe agents then began consuming one another&#x27;s completion events.</p>
+                <dl class="research-facts">
+                    <div><dt>Started</dt><dd>2026-04-14</dd></div>
+                    <div><dt>Ended</dt><dd>2026-04-16</dd></div>
+                    <div><dt>Words</dt><dd>1,305</dd></div>
+                </dl>
+                <p class="research-projects">Projects: <a href="https://www.gradient-bang.com/">Gradient Bang</a></p>
+                <p class="research-report"><a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/04-gradient-bang-automation.md">Read report <span aria-hidden="true">-&gt;</span></a></p>
+            </div>
+        </article>
+        <article class="research-entry" id="case-5">
+            <div class="research-index">CASE 5</div>
+            <div class="research-content">
+                <h2>Tactics.md neural evaluator optimization</h2>
+                <p>Tactics.md used autoresearch to train neural models that evaluated positions inside its game-tree search, testing architecture size, training targets, quantization, and self-play across 435 result bundles. Under the same 10 millisecond move budget, a model that evaluated each position 73 times more slowly still won because its judgments were better, while the model with the best validation loss played worst among matched candidates.</p>
+                <dl class="research-facts">
+                    <div><dt>Started</dt><dd>2026-04-15</dd></div>
+                    <div><dt>Ended</dt><dd>2026-05-08</dd></div>
+                    <div><dt>Words</dt><dd>1,264</dd></div>
+                </dl>
+                <p class="research-projects">Projects: <a href="https://tactics.md/">Tactics.md</a></p>
+                <p class="research-report"><a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/05-tactics-neural-evaluators.md">Read report <span aria-hidden="true">-&gt;</span></a></p>
+            </div>
+        </article>
+        <article class="research-entry" id="case-6">
+            <div class="research-index">CASE 6</div>
+            <div class="research-content">
+                <h2>Options market-making research with multiple LLMs</h2>
+                <p>Options market-making research used GPT-5.5 for implementation, Gemini 3.5 Flash for candidate generation and reflection, and Fable 5 for judgment and stopping decisions. An independent audit found gaps between the research record and implemented system. One candidate failed a causal correction and its replacement survived bounded validation, but the historical return disappeared in a short fresh window with stronger quote competition.</p>
+                <dl class="research-facts">
+                    <div><dt>Started</dt><dd>2026-06-22</dd></div>
+                    <div><dt>Ended</dt><dd>2026-07-10</dd></div>
+                    <div><dt>Words</dt><dd>1,557</dd></div>
+                </dl>
+                <p class="research-report"><a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/06-options-market-making-multi-llm.md">Read report <span aria-hidden="true">-&gt;</span></a></p>
+            </div>
+        </article>
+        <article class="research-entry" id="case-7">
+            <div class="research-index">CASE 7</div>
+            <div class="research-content">
+                <h2>FlySim flight control from simulation to a live application</h2>
+                <p>FlySim trained flight-control policies in a public JAX simulator, then a private overlay tested a frozen policy in a live external flight application. When a half-second handoff clipped 14% of controls, replaying the exact safety-filtered inputs showed that the simulator underrepresented the live aircraft&#x27;s roll and yaw response. Retraining fixed the clipping without weakening the live safety limits.</p>
+                <dl class="research-facts">
+                    <div><dt>Started</dt><dd>2026-07-08</dd></div>
+                    <div><dt>Ended</dt><dd>2026-07-27</dd></div>
+                    <div><dt>Words</dt><dd>1,066</dd></div>
+                </dl>
+                <p class="research-projects">Projects: <a href="https://github.com/wakamex/flysim">FlySim</a></p>
+                <p class="research-report"><a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/07-flysim-sim-to-live.md">Read report <span aria-hidden="true">-&gt;</span></a></p>
+            </div>
+        </article>
+        <article class="research-entry" id="case-8">
+            <div class="research-index">CASE 8</div>
+            <div class="research-content">
+                <h2>Party-management strategy game playtesting with multiple LLMs</h2>
+                <p>A party-management strategy game used six model families as independent playtesters who managed parties, edited character tactics, and revised strategies against a deterministic battle simulator. Their disagreements prevented premature game-design changes, exposed tool-assisted play that violated the rules, and recorded which mechanics the models described as clear, confusing, or engaging.</p>
+                <dl class="research-facts">
+                    <div><dt>Started</dt><dd>2026-08-02</dd></div>
+                    <div><dt>Ended</dt><dd>2026-08-09</dd></div>
+                    <div><dt>Words</dt><dd>1,666</dd></div>
+                </dl>
+                <p class="research-report"><a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/08-strategy-game-multi-model-playtesting.md">Read report <span aria-hidden="true">-&gt;</span></a></p>
+            </div>
+        </article>
+        <article class="research-entry" id="case-9">
+            <div class="research-index">CASE 9</div>
+            <div class="research-content">
+                <h2>FreeTranscribe.org GPU inference optimization</h2>
+                <p>FreeTranscribe.org doubled transcription throughput while sharing one RTX 3090 between live production and autoresearch. Error counts stayed unchanged across 295 broad cases and fell from 105 to 103 on a reviewed long-form set.</p>
+                <dl class="research-facts">
+                    <div><dt>Started</dt><dd>2026-08-06</dd></div>
+                    <div><dt>Ended</dt><dd>2026-08-08</dd></div>
+                    <div><dt>Words</dt><dd>1,476</dd></div>
+                </dl>
+                <p class="research-projects">Projects: <a href="https://freetranscribe.org/">FreeTranscribe.org</a></p>
+                <p class="research-report"><a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/09-freetranscribe-gpu-inference.md">Read report <span aria-hidden="true">-&gt;</span></a></p>
+            </div>
+        </article>
+        <article class="research-entry" id="case-10">
+            <div class="research-index">CASE 10</div>
+            <div class="research-content">
+                <h2>Adaptive quantitative-trading strategy search</h2>
+                <p>Quantitative-trading autoresearch sustained 46 agent-led research cycles in eight hours, implementing 39 strategies and retaining 35 development results that passed causal-attribution checks while sealed future data stayed untouched. Shared-capital replay mapped the development tradeoff between profit and volume. Gemini 3.6 Flash remained the historical bandit leader after completing 10 of 10 cycles; in a later panel, GPT-5.6 Luna medium received similar internal ratings to Sol medium at under one-twentieth the API-equivalent cost.</p>
+                <dl class="research-facts">
+                    <div><dt>Started</dt><dd>2026-08-08</dd></div>
+                    <div><dt>Ended</dt><dd>2026-08-11</dd></div>
+                    <div><dt>Words</dt><dd>1,789</dd></div>
+                </dl>
+                <p class="research-report"><a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/10-trading-strategy-search.md">Read report <span aria-hidden="true">-&gt;</span></a></p>
+            </div>
+        </article>
+        </div>
+    </main>
+    <script src="/meters.js"></script>
+</body>
+</html>

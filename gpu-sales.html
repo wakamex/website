@@ -241,7 +241,7 @@
     <span>Taxes, duties and brokerage are excluded.</span>
   </footer>
 
-  <script src="/gpu-sales-data.js"></script>
+  <script src="/gpu-sales-data.js?v=20260811-2"></script>
   <script>
     (() => {
       const documentData = window.GPU_SALES_DATA;
@@ -250,6 +250,22 @@
         ...trend,
         points: trend.points.map(point => ({ ...point, date: new Date(`${point.date}T00:00:00`) }))
       }]));
+      const modSales = sales
+        .filter(sale => sale.gpu === "4080-32")
+        .sort((a, b) => a.date - b.date);
+      if (modSales.length) {
+        trends["4080-32"] = {
+          gpu: "4080-32",
+          metric: "observed_total_cad",
+          latest_cad: modSales.at(-1).total_cad,
+          points: modSales.map(sale => ({
+            date: sale.date,
+            value_cad: sale.total_cad,
+            lower_cad: sale.total_cad,
+            upper_cad: sale.total_cad
+          }))
+        };
+      }
       const svg = document.getElementById("price-plot");
       const tbody = document.getElementById("sales-body");
       const tooltip = document.getElementById("tooltip");

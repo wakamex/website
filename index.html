@@ -30,33 +30,12 @@
 
     <!-- AUTORESEARCH:START -->
     <section class="featured-research" aria-labelledby="featured-research-title">
-        <h2 id="featured-research-title">Featured Research</h2>
-        <div class="research-list">
-        <article class="research-entry research-entry-featured">
-            <div class="research-index">CASE 5</div>
-            <div class="research-content">
-                <h3><a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/05-tactics-neural-evaluators.md">Tactics.md neural evaluator optimization</a></h3>
-                <p>Tactics.md used autoresearch to train neural models that evaluated positions inside its game-tree search, testing architecture size, training targets, quantization, and self-play across 435 result bundles. Under the same 10 millisecond move budget, a model that evaluated each position 73 times more slowly still won because its judgments were better, while the model with the best validation loss played worst among matched candidates.</p>
-                <p class="research-meta">2026-04-15 - 2026-05-08 <span aria-hidden="true">//</span> <a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/05-tactics-neural-evaluators.md">read report</a></p>
-            </div>
-        </article>
-        <article class="research-entry research-entry-featured">
-            <div class="research-index">CASE 9</div>
-            <div class="research-content">
-                <h3><a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/09-freetranscribe-gpu-inference.md">FreeTranscribe.org GPU inference optimization</a></h3>
-                <p>FreeTranscribe.org doubled transcription throughput while sharing one RTX 3090 between live production and autoresearch. Error counts stayed unchanged across 295 broad cases and fell from 105 to 103 on a reviewed long-form set.</p>
-                <p class="research-meta">2026-08-06 - 2026-08-08 <span aria-hidden="true">//</span> <a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/09-freetranscribe-gpu-inference.md">read report</a></p>
-            </div>
-        </article>
-        <article class="research-entry research-entry-featured">
-            <div class="research-index">CASE 10</div>
-            <div class="research-content">
-                <h3><a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/10-trading-strategy-search.md">Adaptive quantitative-trading strategy search</a></h3>
-                <p>Quantitative-trading autoresearch sustained 46 agent-led research cycles in eight hours, implementing 39 strategies and retaining 35 development results that passed causal-attribution checks while sealed future data stayed untouched. Shared-capital replay mapped the development tradeoff between profit and volume. Gemini 3.6 Flash remained the historical bandit leader after completing 10 of 10 cycles; in a later panel, GPT-5.6 Luna medium received similar internal ratings to Sol medium at under one-twentieth the API-equivalent cost.</p>
-                <p class="research-meta">2026-08-08 - 2026-08-11 <span aria-hidden="true">//</span> <a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/10-trading-strategy-search.md">read report</a></p>
-            </div>
-        </article>
-        </div>
+        <h2 id="featured-research-title">Featured Autoresearch</h2>
+        <ul class="featured-research-list">
+            <li><a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/05-tactics-neural-evaluators.md">CASE 5 (2026-04-15)</a> Tactics.md neural evaluator optimization - Tactics.md used autoresearch to train neural models that evaluated positions inside its game-tree search, testing architecture size, training targets, quantization, and self-play across 435 result bundles. Under the same 10 millisecond move budget, a model that evaluated each position 73 times more slowly still won because its judgments were better, while the model with the best validation loss played worst among matched candidates.</li>
+            <li><a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/09-freetranscribe-gpu-inference.md">CASE 9 (2026-08-06)</a> FreeTranscribe.org GPU inference optimization - FreeTranscribe.org doubled transcription throughput while sharing one RTX 3090 between live production and autoresearch. Error counts stayed unchanged across 295 broad cases and fell from 105 to 103 on a reviewed long-form set.</li>
+            <li><a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/10-trading-strategy-search.md">CASE 10 (2026-08-08)</a> Adaptive quantitative-trading strategy search - Quantitative-trading autoresearch sustained 46 agent-led research cycles in eight hours, implementing 39 strategies and retaining 35 development results that passed causal-attribution checks while sealed future data stayed untouched. Shared-capital replay mapped the development tradeoff between profit and volume. Gemini 3.6 Flash remained the historical bandit leader after completing 10 of 10 cycles; in a later panel, GPT-5.6 Luna medium received similar internal ratings to Sol medium at under one-twentieth the API-equivalent cost.</li>
+        </ul>
         <p class="research-collection-link"><a href="/autoresearch.html">View the full collection (10 cases) <span aria-hidden="true">-&gt;</span></a></p>
     </section>
     <!-- AUTORESEARCH:END -->

@@ -61,6 +61,17 @@ class AutoresearchBuildTests(unittest.TestCase):
         positions = [rendered.index(f'CASE {case["case"]}') for case in ranked_cases]
         self.assertEqual(positions, sorted(positions))
 
+    def test_featured_cases_use_compact_source_content(self):
+        rendered = builder.render_featured(builder.validate_feed(copy.deepcopy(self.feed)))
+        self.assertIn("Featured Autoresearch", rendered)
+        for case in self.feed["cases"]:
+            if case["featured_rank"] is None:
+                continue
+            self.assertIn(f'CASE {case["case"]} ({case["started"]})', rendered)
+            self.assertIn(case["title"], rendered)
+            self.assertIn(case["summary_text"], rendered)
+        self.assertNotIn('class="research-entry', rendered)
+
     def test_new_case_and_changed_text_need_no_template_change(self):
         feed = copy.deepcopy(self.feed)
         new_case = copy.deepcopy(feed["cases"][-1])

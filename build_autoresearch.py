@@ -216,20 +216,13 @@ def render_featured(data: dict[str, Any], warning: str | None = None) -> str:
     items = []
     for case in featured:
         items.append(
-            f'''        <article class="research-entry research-entry-featured">
-            <div class="research-index">CASE {esc(case["case"])}</div>
-            <div class="research-content">
-                <h3><a href="{esc(case["report_url"])}">{esc(case["title"])}</a></h3>
-                <p>{esc(case["summary_text"])}</p>
-                <p class="research-meta">{esc(case["started"])} - {esc(case["ended"])} <span aria-hidden="true">//</span> <a href="{esc(case["report_url"])}">read report</a></p>
-            </div>
-        </article>'''
+            f'''            <li><a href="{esc(case["report_url"])}">CASE {esc(case["case"])} ({esc(case["started"])})</a> {esc(case["title"])} - {esc(case["summary_text"])}</li>'''
         )
     return f'''    <section class="featured-research" aria-labelledby="featured-research-title">
-        <h2 id="featured-research-title">Featured Research</h2>
-{render_warning(warning)}        <div class="research-list">
+        <h2 id="featured-research-title">Featured Autoresearch</h2>
+{render_warning(warning)}        <ul class="featured-research-list">
 {chr(10).join(items)}
-        </div>
+        </ul>
         <p class="research-collection-link"><a href="/autoresearch.html">View the full collection ({len(data["cases"])} cases) <span aria-hidden="true">-&gt;</span></a></p>
     </section>'''
 

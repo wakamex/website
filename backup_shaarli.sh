@@ -4,7 +4,7 @@ set -euo pipefail
 REMOTE="mc-new"
 ZONE="us-central1-a"
 REMOTE_PARENT="/var/www/mihaicosma.com"
-REMOTE_NAME="shaarli"
+REMOTE_NAME="links"
 BACKUP_DIR="/mnt/raid5/website/shaarli"
 
 timestamp=$(date -u +%Y%m%dT%H%M%SZ)

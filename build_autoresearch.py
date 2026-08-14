@@ -14,6 +14,8 @@ from typing import Any
 from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
+from site_shared import render_site_header
+
 
 ROOT = Path(__file__).parent
 DEFAULT_SOURCE = (
@@ -265,16 +267,8 @@ def render_collection(data: dict[str, Any], warning: str | None = None) -> str:
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+{render_site_header("autoresearch")}
     <a href="/status.html" class="meters-link"><div class="meters" id="meters"></div></a>
-    <div class="links links-top">
-        <a href="/">Home</a>
-        <a href="https://github.com/wakamex">GitHub</a>
-        <a href="https://x.com/mihai673">Twitter</a>
-        <a href="/resume.html">Resume</a>
-        <a href="/blog.html">Blog</a>
-        <a href="/autoresearch.html" aria-current="page">Autoresearch</a>
-        <a href="/status.html">Status</a>
-    </div>
     <main class="autoresearch">
         <header class="research-header">
             <p class="research-kicker">AUTORESEARCH / FIELD REPORTS</p>
@@ -287,6 +281,7 @@ def render_collection(data: dict[str, Any], warning: str | None = None) -> str:
         </div>
     </main>
     <script src="/meters.js"></script>
+    <script src="/site-nav.js"></script>
 </body>
 </html>
 '''

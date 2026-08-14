@@ -3,3 +3,5 @@ posts/*.html
 blog.html
 .env
 .private/
+__pycache__/
+SECURITY_PRIVACY_REVIEW.md

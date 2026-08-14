@@ -5,21 +5,14 @@ from pathlib import Path
 
 import markdown
 
+from site_shared import render_site_header
+
 ROOT = Path(__file__).parent
 POSTS_DIR = ROOT / "posts"
 FILENAME_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})-(.+)\.md$")
 
-LINKS = """    <div class="links links-top">
-        <a href="/">Home</a>
-        <a href="https://github.com/wakamex">GitHub</a>
-        <a href="https://x.com/mihai673">Twitter</a>
-        <a href="/resume.html">Resume</a>
-        <a href="/blog.html">Blog</a>
-        <a href="/autoresearch.html">Autoresearch</a>
-        <a href="/status.html">Status</a>
-    </div>"""
-
 METERS = '    <a href="/status.html" class="meters-link"><div class="meters" id="meters"></div></a>'
+SITE_HEADER = render_site_header("blog")
 
 POST_TEMPLATE = f"""<!DOCTYPE html>
 <html lang="en">
@@ -30,14 +23,15 @@ POST_TEMPLATE = f"""<!DOCTYPE html>
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+{SITE_HEADER}
 {METERS}
-{LINKS}
     <article class="post">
         <h1>{{title}}</h1>
         <p class="post-meta">{{date_str}}</p>
 {{body}}
     </article>
     <script src="/meters.js"></script>
+    <script src="/site-nav.js"></script>
 </body>
 </html>
 """
@@ -51,13 +45,14 @@ INDEX_TEMPLATE = f"""<!DOCTYPE html>
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+{SITE_HEADER}
 {METERS}
-{LINKS}
     <h1>Blog</h1>
     <ul class="post-list">
 {{items}}
     </ul>
     <script src="/meters.js"></script>
+    <script src="/site-nav.js"></script>
 </body>
 </html>
 """

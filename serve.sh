@@ -26,4 +26,4 @@ done
 
 ip=$(hostname -I | awk '{print $1}')
 echo "Serving on http://localhost:$port and http://$ip:$port (LAN)"
-exec python3 -m http.server "$port" --bind 0.0.0.0
+exec python3 lan_server.py "$port"

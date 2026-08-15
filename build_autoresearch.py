@@ -22,7 +22,7 @@ DEFAULT_SOURCE = (
     "https://raw.githubusercontent.com/wakamex/autoresearch/master/"
     "learnings/case-studies/case-studies.json"
 )
-SUPPORTED_SCHEMA_VERSIONS = {1}
+SUPPORTED_SCHEMA_VERSIONS = {2}
 START_MARKER = "    <!-- AUTORESEARCH:START -->"
 END_MARKER = "    <!-- AUTORESEARCH:END -->"
 
@@ -32,6 +32,7 @@ ROOT_FIELDS = {
     "description": str,
     "updated": str,
     "repository_url": str,
+    "token_estimates": dict,
     "cases": list,
 }
 CASE_FIELDS = {
@@ -44,6 +45,7 @@ CASE_FIELDS = {
     "summary_markdown": str,
     "summary_text": str,
     "word_count": int,
+    "token_estimate": dict,
     "report_url": str,
     "raw_url": str,
 }
@@ -90,6 +92,22 @@ def validate_feed(data: Any) -> dict[str, Any]:
     parse_date(data["updated"], "feed.updated")
     validate_url(data["repository_url"], "feed.repository_url")
 
+    token_estimates = data["token_estimates"]
+    require_fields(
+        token_estimates,
+        {"processed_tokens": int, "effective_tokens": int, "method": str},
+        "feed.token_estimates",
+    )
+    if set(token_estimates) != {"processed_tokens", "effective_tokens", "method"}:
+        raise FeedError("feed.token_estimates: unexpected fields")
+    for field in ("processed_tokens", "effective_tokens"):
+        if token_estimates[field] < 0:
+            raise FeedError(f"feed.token_estimates.{field}: expected a non-negative integer")
+    if token_estimates["effective_tokens"] > token_estimates["processed_tokens"]:
+        raise FeedError("feed.token_estimates: effective tokens exceed processed tokens")
+    if not token_estimates["method"].strip():
+        raise FeedError("feed.token_estimates.method: expected a non-empty string")
+
     case_numbers: set[int] = set()
     slugs: set[str] = set()
     featured_ranks: set[int] = set()
@@ -120,6 +138,27 @@ def validate_feed(data: Any) -> dict[str, Any]:
             raise FeedError(f"{context}: started date is after ended date")
         if case["word_count"] <= 0:
             raise FeedError(f"{context}.word_count: expected a positive integer")
+
+        token_estimate = case["token_estimate"]
+        require_fields(
+            token_estimate,
+            {"processed_tokens": int, "effective_tokens": int, "confidence": str},
+            f"{context}.token_estimate",
+        )
+        expected_token_fields = {"processed_tokens", "effective_tokens", "confidence"}
+        if set(token_estimate) != expected_token_fields:
+            raise FeedError(f"{context}.token_estimate: unexpected fields")
+        for field in ("processed_tokens", "effective_tokens"):
+            if token_estimate[field] < 0:
+                raise FeedError(
+                    f"{context}.token_estimate.{field}: expected a non-negative integer"
+                )
+        if token_estimate["effective_tokens"] > token_estimate["processed_tokens"]:
+            raise FeedError(f"{context}.token_estimate: effective tokens exceed processed tokens")
+        if token_estimate["confidence"] not in {"high", "medium", "low"}:
+            raise FeedError(
+                f"{context}.token_estimate.confidence: expected high, medium, or low"
+            )
 
         rank = case.get("featured_rank")
         if rank is not None:
@@ -229,10 +268,26 @@ def render_featured(data: dict[str, Any], warning: str | None = None) -> str:
     </section>'''
 
 
+def format_effective_tokens(tokens: int) -> str:
+    if tokens >= 1_000_000_000:
+        value = f"{tokens / 1_000_000_000:.2f}".rstrip("0").rstrip(".")
+        return f"{value}B"
+    if tokens >= 1_000_000:
+        value = f"{tokens / 1_000_000:.1f}".rstrip("0").rstrip(".")
+        return f"{value}M"
+    if tokens >= 1_000:
+        value = f"{tokens / 1_000:.1f}".rstrip("0").rstrip(".")
+        return f"{value}K"
+    return str(tokens)
+
+
 def render_case(case: dict[str, Any]) -> str:
+    effective_tokens = format_effective_tokens(
+        case["token_estimate"]["effective_tokens"]
+    )
     return f'''        <article class="research-entry" id="case-{esc(case["case"])}">
             <p class="research-summary"><a href="{esc(case["report_url"])}">CASE {esc(case["case"])}</a> {esc(case["summary_text"])}</p>
-            <p class="research-meta">{esc(case["started"])} - {esc(case["ended"])} <span aria-hidden="true">/</span> {esc(f'{case["word_count"]:,}')} words</p>
+            <p class="research-meta">{esc(case["started"])} - {esc(case["ended"])} <span aria-hidden="true">/</span> {esc(effective_tokens)} effective tokens</p>
         </article>'''
 
 

@@ -17,6 +17,11 @@ def sample_case(number, *, featured_rank=None, links=None):
         "summary_markdown": f"Sample **markdown** {number}.",
         "summary_text": f"Sample text {number}.",
         "word_count": 100 + number,
+        "token_estimate": {
+            "processed_tokens": 100_000_000 + number,
+            "effective_tokens": 10_000_000 + number,
+            "confidence": "high",
+        },
         "featured_rank": featured_rank,
         "report_url": f"https://example.com/reports/{number}",
         "raw_url": f"https://example.com/reports/{number}.txt",
@@ -30,11 +35,16 @@ class AutoresearchBuildTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.feed = {
-            "schema_version": 1,
+            "schema_version": 2,
             "title": "Sample collection",
             "description": "Sample collection description.",
             "updated": "2026-01-03",
             "repository_url": "https://example.com/repository",
+            "token_estimates": {
+                "processed_tokens": 200_000_003,
+                "effective_tokens": 20_000_003,
+                "method": "Sample audited estimate.",
+            },
             "cases": [
                 sample_case(
                     1,
@@ -108,7 +118,7 @@ class AutoresearchBuildTests(unittest.TestCase):
             rendered,
         )
         self.assertIn("2026-01-01 - 2026-01-02", rendered)
-        self.assertIn("101 words", rendered)
+        self.assertIn("10M effective tokens", rendered)
         self.assertNotIn(case["title"], rendered)
         self.assertNotIn("Projects:", rendered)
         self.assertNotIn("Read report", rendered)
@@ -131,6 +141,16 @@ class AutoresearchBuildTests(unittest.TestCase):
         feed["cases"][0]["word_count"] = "many"
         with self.assertRaisesRegex(builder.FeedError, r"word_count: expected int, got str"):
             builder.validate_feed(feed)
+
+    def test_invalid_token_estimate_fails_clearly(self):
+        feed = copy.deepcopy(self.feed)
+        feed["cases"][0]["token_estimate"]["effective_tokens"] = 200_000_000
+        with self.assertRaisesRegex(builder.FeedError, "effective tokens exceed processed"):
+            builder.validate_feed(feed)
+
+    def test_effective_token_formatting(self):
+        self.assertEqual(builder.format_effective_tokens(33_000_000), "33M")
+        self.assertEqual(builder.format_effective_tokens(1_320_000_000), "1.32B")
 
     def test_unsafe_project_url_fails_validation(self):
         feed = copy.deepcopy(self.feed)

@@ -34,43 +34,43 @@
         <div class="research-list research-list-complete">
         <article class="research-entry" id="case-1">
             <p class="research-summary"><a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/01-mnk-transfer.md">CASE 1</a> M,N,K game research used a Rust and CUDA AlphaZero system to test whether a smaller-board checkpoint could improve learning on a larger board. The checkpoint loaded successfully, but the campaign never established a benefit over matched scratch training, and several promising settings produced a worse and more expensive combined result.</p>
-            <p class="research-meta">2026-02-04 - 2026-02-22 <span aria-hidden="true">/</span> 1,379 words</p>
+            <p class="research-meta">2026-02-04 - 2026-02-22 <span aria-hidden="true">/</span> 33M effective tokens</p>
         </article>
         <article class="research-entry" id="case-2">
             <p class="research-summary"><a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/02-tactics-search.md">CASE 2</a> Tactics.md used autoresearch to develop and tune its hand-written Greedy and Heuristic agents across more than 24 million simulated games, then test learned action search. One learned model reached 86.7% held-out accuracy but scored only 10% against the simpler Greedy agent because useful actions were pruned before deeper evaluation.</p>
-            <p class="research-meta">2026-03-07 - 2026-04-07 <span aria-hidden="true">/</span> 1,292 words</p>
+            <p class="research-meta">2026-03-07 - 2026-04-07 <span aria-hidden="true">/</span> 1.32B effective tokens</p>
         </article>
         <article class="research-entry" id="case-3">
             <p class="research-summary"><a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/03-tactics-cpu-optimization.md">CASE 3</a> Tactics.md used Codex to test 102 interventions on the CPU pipeline generating self-play training games, accelerating turn search and quantized neural evaluation while uncovering eight correctness defects. Narrow component benchmarks repeatedly misled; only full-turn replay and end-to-end self-play could distinguish real speedups from changed game behavior.</p>
-            <p class="research-meta">2026-03-10 - 2026-03-11 <span aria-hidden="true">/</span> 978 words</p>
+            <p class="research-meta">2026-03-10 - 2026-03-11 <span aria-hidden="true">/</span> 86M effective tokens</p>
         </article>
         <article class="research-entry" id="case-4">
             <p class="research-summary"><a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/04-gradient-bang-automation.md">CASE 4</a> A Gradient Bang headless client completed live trading, combat, fleet, and exploration workflows and reached contemporaneous visible ranks of 29 in exploration and 27 in trading. Parallel probe agents then began consuming one another&#x27;s completion events.</p>
-            <p class="research-meta">2026-04-14 - 2026-04-16 <span aria-hidden="true">/</span> 1,305 words</p>
+            <p class="research-meta">2026-04-14 - 2026-04-16 <span aria-hidden="true">/</span> 47M effective tokens</p>
         </article>
         <article class="research-entry" id="case-5">
             <p class="research-summary"><a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/05-tactics-neural-evaluators.md">CASE 5</a> Tactics.md used autoresearch to train neural models that evaluated positions inside its game-tree search, testing architecture size, training targets, quantization, and self-play across 435 result bundles. Under the same 10 millisecond move budget, a model that evaluated each position 73 times more slowly still won because its judgments were better, while the model with the best validation loss played worst among matched candidates.</p>
-            <p class="research-meta">2026-04-15 - 2026-05-08 <span aria-hidden="true">/</span> 1,264 words</p>
+            <p class="research-meta">2026-04-15 - 2026-05-08 <span aria-hidden="true">/</span> 118M effective tokens</p>
         </article>
         <article class="research-entry" id="case-6">
             <p class="research-summary"><a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/06-options-market-making-multi-llm.md">CASE 6</a> Options market-making research used GPT-5.5 for implementation, Gemini 3.5 Flash for candidate generation and reflection, and Fable 5 for judgment and stopping decisions. An independent audit found gaps between the research record and implemented system. One candidate failed a causal correction and its replacement survived bounded validation, but the historical return disappeared in a short fresh window with stronger quote competition.</p>
-            <p class="research-meta">2026-06-22 - 2026-07-10 <span aria-hidden="true">/</span> 1,557 words</p>
+            <p class="research-meta">2026-06-22 - 2026-07-10 <span aria-hidden="true">/</span> 500M effective tokens</p>
         </article>
         <article class="research-entry" id="case-7">
             <p class="research-summary"><a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/07-flysim-sim-to-live.md">CASE 7</a> FlySim trained flight-control policies in a public JAX simulator, then a private overlay tested a frozen policy in a live external flight application. When a half-second handoff clipped 14% of controls, replaying the exact safety-filtered inputs showed that the simulator underrepresented the live aircraft&#x27;s roll and yaw response. Retraining fixed the clipping without weakening the live safety limits.</p>
-            <p class="research-meta">2026-07-08 - 2026-07-27 <span aria-hidden="true">/</span> 1,066 words</p>
+            <p class="research-meta">2026-07-08 - 2026-07-27 <span aria-hidden="true">/</span> 240M effective tokens</p>
         </article>
         <article class="research-entry" id="case-8">
             <p class="research-summary"><a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/08-strategy-game-multi-model-playtesting.md">CASE 8</a> A party-management strategy game used six model families as independent playtesters who managed parties, edited character tactics, and revised strategies against a deterministic battle simulator. Their disagreements prevented premature game-design changes, exposed tool-assisted play that violated the rules, and recorded which mechanics the models described as clear, confusing, or engaging.</p>
-            <p class="research-meta">2026-08-02 - 2026-08-09 <span aria-hidden="true">/</span> 1,666 words</p>
+            <p class="research-meta">2026-08-02 - 2026-08-09 <span aria-hidden="true">/</span> 68M effective tokens</p>
         </article>
         <article class="research-entry" id="case-9">
             <p class="research-summary"><a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/09-freetranscribe-gpu-inference.md">CASE 9</a> FreeTranscribe.org doubled transcription throughput while sharing one RTX 3090 between live production and autoresearch. Error counts stayed unchanged across 295 broad cases and fell from 105 to 103 on a reviewed long-form set.</p>
-            <p class="research-meta">2026-08-06 - 2026-08-08 <span aria-hidden="true">/</span> 1,476 words</p>
+            <p class="research-meta">2026-08-06 - 2026-08-08 <span aria-hidden="true">/</span> 144M effective tokens</p>
         </article>
         <article class="research-entry" id="case-10">
             <p class="research-summary"><a href="https://github.com/wakamex/autoresearch/blob/master/learnings/case-studies/10-trading-strategy-search.md">CASE 10</a> Quantitative-trading autoresearch sustained 46 agent-led research cycles in eight hours, implementing 39 strategies and retaining 35 development results that passed causal-attribution checks while sealed future data stayed untouched. Shared-capital replay mapped the development tradeoff between profit and volume. Gemini 3.6 Flash remained the historical bandit leader after completing 10 of 10 cycles; in a later panel, GPT-5.6 Luna medium received similar internal ratings to Sol medium at under one-twentieth the API-equivalent cost.</p>
-            <p class="research-meta">2026-08-08 - 2026-08-11 <span aria-hidden="true">/</span> 1,789 words</p>
+            <p class="research-meta">2026-08-08 - 2026-08-11 <span aria-hidden="true">/</span> 143M effective tokens</p>
         </article>
         </div>
     </main>

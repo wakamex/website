@@ -8,6 +8,7 @@ python3 build_shared_site.py
 remote="mc-new"
 zone="us-central1-a"
 source_file="shaarli-theme/refined.css"
+template_patcher="shaarli-theme/patch_linklist.py"
 plugin_dir="shaarli-theme/site_navigation"
 remote_root="/var/www/mihaicosma.com/links"
 target="$remote_root/data/user.css"
@@ -23,6 +24,7 @@ trap cleanup EXIT
 
 gcloud compute scp \
     "$source_file" \
+    "$template_patcher" \
     "$plugin_dir/site_navigation.php" \
     "$plugin_dir/site_navigation.meta" \
     "$plugin_dir/navigation.generated.php" \
@@ -34,6 +36,8 @@ gcloud compute ssh "$remote" --zone="$zone" --quiet --command="
     test -d '$remote_root'
     php -l '$remote_tmp/site_navigation.php'
     php -l '$remote_tmp/navigation.generated.php'
+    sudo python3 '$remote_tmp/patch_linklist.py' \
+        '$remote_root/tpl/default/linklist.html'
     sudo install -d -m 755 -o www-data -g www-data '$remote_root/plugins/site_navigation'
     sudo install -m 644 -o www-data -g www-data '$remote_tmp/site_navigation.php' \
         '$remote_root/plugins/site_navigation/site_navigation.php'

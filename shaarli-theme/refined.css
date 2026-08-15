@@ -428,6 +428,35 @@ input[type="submit"]:hover,
     color: var(--refined-bright);
 }
 
+/* Search suggestions */
+.awesomplete > ul {
+    width: 100%;
+    min-width: 100%;
+    margin: 3px 0 0;
+    border: 1px solid var(--refined-border);
+    border-radius: 0;
+    box-shadow: none;
+    background: var(--refined-panel);
+    color: var(--refined-text);
+}
+
+.awesomplete > ul::before {
+    display: none;
+}
+
+.awesomplete > ul > li:hover,
+.awesomplete > ul > li[aria-selected="true"] {
+    background: var(--refined-border-soft);
+    color: var(--refined-bright);
+}
+
+.awesomplete mark,
+.awesomplete li:hover mark,
+.awesomplete li[aria-selected="true"] mark {
+    background: transparent;
+    color: #ff9800;
+}
+
 .subheader-form {
     background: var(--refined-panel);
     border-bottom: 1px solid var(--refined-border);

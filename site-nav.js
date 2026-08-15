@@ -1,7 +1,9 @@
 (function () {
     document.querySelectorAll(".site-header").forEach(function (header) {
         var toggle = header.querySelector(".site-header-toggle");
-        var navigation = header.querySelector(".links-top");
+        var navigation =
+            header.querySelector(".site-header-navigation") ||
+            header.querySelector(".links-top");
         if (!toggle || !navigation) return;
 
         header.classList.add("site-header-enabled");

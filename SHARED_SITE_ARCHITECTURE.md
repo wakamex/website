@@ -33,6 +33,7 @@ The normal deployment also rebuilds Blog and Autoresearch. Shaarli PHP files are
 - Static and Shaarli active-page generation.
 - Static and Shaarli deployment through the full deployment path.
 - Basic navigation-source validation and deterministic generation.
+- A homepage-only secondary row for GitHub, Twitter, and Resume, generated from the same canonical navigation data.
 
 ## Deliberately separate concerns
 

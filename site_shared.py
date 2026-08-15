@@ -42,21 +42,60 @@ def load_navigation() -> list[dict[str, str]]:
     return navigation
 
 
-def render_site_header(active: str) -> str:
+def render_site_header(
+    active: str, secondary_slugs: tuple[str, ...] = ()
+) -> str:
     navigation = load_navigation()
-    if active not in {item["slug"] for item in navigation}:
+    navigation_slugs = {item["slug"] for item in navigation}
+    if active not in navigation_slugs:
         raise SharedSiteError(f"unknown active navigation slug: {active}")
+    unknown_secondary = set(secondary_slugs) - navigation_slugs
+    if unknown_secondary:
+        raise SharedSiteError(
+            "unknown secondary navigation slug: "
+            + ", ".join(sorted(unknown_secondary))
+        )
 
-    links = []
-    for item in navigation:
-        attributes = [
-            f'href="{html.escape(item["href"], quote=True)}"',
-            f'class="site-navigation-link site-navigation-{html.escape(item["slug"], quote=True)}"',
-        ]
-        if item["slug"] == active:
-            attributes.append('aria-current="page"')
-        links.append(
-            f"        <a {' '.join(attributes)}>{html.escape(item['label'])}</a>"
+    def render_links(items: list[dict[str, str]], indent: str) -> list[str]:
+        links = []
+        for item in items:
+            attributes = [
+                f'href="{html.escape(item["href"], quote=True)}"',
+                f'class="site-navigation-link site-navigation-{html.escape(item["slug"], quote=True)}"',
+            ]
+            if item["slug"] == active:
+                attributes.append('aria-current="page"')
+            links.append(
+                f"{indent}<a {' '.join(attributes)}>{html.escape(item['label'])}</a>"
+            )
+        return links
+
+    secondary_slug_set = set(secondary_slugs)
+    primary_items = [
+        item for item in navigation if item["slug"] not in secondary_slug_set
+    ]
+    secondary_items = [
+        item for item in navigation if item["slug"] in secondary_slug_set
+    ]
+
+    if secondary_items:
+        return "\n".join(
+            [
+                NAVIGATION_START.format(active=active),
+                '    <header class="site-header site-header-two-row">',
+                '      <a class="site-header-title" href="/">Mihai Cosma</a>',
+                '      <button class="site-header-toggle" type="button" aria-controls="site-navigation" aria-expanded="false" aria-label="Menu" hidden><span class="bar"></span><span class="bar"></span></button>',
+                '      <div class="site-header-navigation" id="site-navigation">',
+                '        <nav class="links links-top" aria-label="Main navigation">',
+                *render_links(primary_items, "          "),
+                "        </nav>",
+                '        <nav class="links site-header-secondary" aria-label="Professional navigation">',
+                *render_links(secondary_items, "          "),
+                "        </nav>",
+                "      </div>",
+                "    </header>",
+                NAVIGATION_END,
+            ]
         )
 
     return "\n".join(
@@ -66,7 +105,7 @@ def render_site_header(active: str) -> str:
             '      <a class="site-header-title" href="/">Mihai Cosma</a>',
             '      <button class="site-header-toggle" type="button" aria-controls="site-navigation" aria-expanded="false" aria-label="Menu" hidden><span class="bar"></span><span class="bar"></span></button>',
             '      <nav class="links links-top" id="site-navigation" aria-label="Main navigation">',
-            *links,
+            *render_links(primary_items, "        "),
             "      </nav>",
             "    </header>",
             NAVIGATION_END,

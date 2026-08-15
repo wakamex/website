@@ -68,8 +68,8 @@ class AutoresearchBuildTests(unittest.TestCase):
             if case["featured_rank"] is None:
                 continue
             self.assertIn(f'CASE {case["case"]} ({case["started"]})', rendered)
-            self.assertIn(case["title"], rendered)
             self.assertIn(case["summary_text"], rendered)
+            self.assertNotIn(case["title"], rendered)
         self.assertNotIn('class="research-entry', rendered)
 
     def test_new_case_and_changed_text_need_no_template_change(self):
@@ -88,15 +88,30 @@ class AutoresearchBuildTests(unittest.TestCase):
         feed["cases"].append(new_case)
         rendered = builder.render_collection(builder.validate_feed(feed))
         self.assertIn('id="case-99"', rendered)
-        self.assertIn("A &lt;new&gt; case", rendered)
         self.assertIn("Exact source text &amp; outcome.", rendered)
+        self.assertNotIn("A &lt;new&gt; case", rendered)
         self.assertNotIn(new_case["summary_markdown"], rendered)
 
     def test_optional_links_may_be_absent(self):
         feed = copy.deepcopy(self.feed)
         feed["cases"][0].pop("links")
         rendered = builder.render_collection(builder.validate_feed(feed))
-        self.assertNotIn("Projects:", rendered.split('id="case-1"', 1)[1].split("</article>", 1)[0])
+        first_case = rendered.split('id="case-1"', 1)[1].split("</article>", 1)[0]
+        self.assertNotIn("Projects:", first_case)
+
+    def test_collection_case_is_inline_with_summary_and_compact_metadata(self):
+        rendered = builder.render_collection(builder.validate_feed(copy.deepcopy(self.feed)))
+        case = self.feed["cases"][0]
+        self.assertIn(
+            f'<p class="research-summary"><a href="{case["report_url"]}">CASE 1</a> '
+            f'{case["summary_text"]}</p>',
+            rendered,
+        )
+        self.assertIn("2026-01-01 - 2026-01-02", rendered)
+        self.assertIn("101 words", rendered)
+        self.assertNotIn(case["title"], rendered)
+        self.assertNotIn("Projects:", rendered)
+        self.assertNotIn("Read report", rendered)
 
     def test_duplicate_case_numbers_fail(self):
         feed = copy.deepcopy(self.feed)

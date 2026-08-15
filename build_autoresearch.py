@@ -218,7 +218,7 @@ def render_featured(data: dict[str, Any], warning: str | None = None) -> str:
     items = []
     for case in featured:
         items.append(
-            f'''            <li><a href="{esc(case["report_url"])}">CASE {esc(case["case"])} ({esc(case["started"])})</a> {esc(case["title"])} - {esc(case["summary_text"])}</li>'''
+            f'''            <li><a href="{esc(case["report_url"])}">CASE {esc(case["case"])} ({esc(case["started"])})</a> {esc(case["summary_text"])}</li>'''
         )
     return f'''    <section class="featured-research" aria-labelledby="featured-research-title">
         <h2 id="featured-research-title">Featured Autoresearch</h2>
@@ -230,25 +230,9 @@ def render_featured(data: dict[str, Any], warning: str | None = None) -> str:
 
 
 def render_case(case: dict[str, Any]) -> str:
-    links = case.get("links", [])
-    project_links = ""
-    if links:
-        rendered = " ".join(
-            f'<a href="{esc(link["url"])}">{esc(link["text"])}</a>' for link in links
-        )
-        project_links = f'                <p class="research-projects">Projects: {rendered}</p>\n'
     return f'''        <article class="research-entry" id="case-{esc(case["case"])}">
-            <div class="research-index">CASE {esc(case["case"])}</div>
-            <div class="research-content">
-                <h2>{esc(case["title"])}</h2>
-                <p>{esc(case["summary_text"])}</p>
-                <dl class="research-facts">
-                    <div><dt>Started</dt><dd>{esc(case["started"])}</dd></div>
-                    <div><dt>Ended</dt><dd>{esc(case["ended"])}</dd></div>
-                    <div><dt>Words</dt><dd>{esc(f'{case["word_count"]:,}')}</dd></div>
-                </dl>
-{project_links}                <p class="research-report"><a href="{esc(case["report_url"])}">Read report <span aria-hidden="true">-&gt;</span></a></p>
-            </div>
+            <p class="research-summary"><a href="{esc(case["report_url"])}">CASE {esc(case["case"])}</a> {esc(case["summary_text"])}</p>
+            <p class="research-meta">{esc(case["started"])} - {esc(case["ended"])} <span aria-hidden="true">/</span> {esc(f'{case["word_count"]:,}')} words</p>
         </article>'''
 
 
@@ -271,7 +255,6 @@ def render_collection(data: dict[str, Any], warning: str | None = None) -> str:
     <a href="/status.html" class="meters-link"><div class="meters" id="meters"></div></a>
     <main class="autoresearch">
         <header class="research-header">
-            <p class="research-kicker">AUTORESEARCH / FIELD REPORTS</p>
             <h1>{esc(data["title"])}</h1>
             <p class="research-description">{esc(data["description"])}</p>
             <p class="research-overview">{len(cases)} cases <span aria-hidden="true">//</span> {esc(first_started)} - {esc(last_ended)}</p>

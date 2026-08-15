@@ -450,6 +450,15 @@ input[type="submit"]:hover,
     color: var(--refined-bright);
 }
 
+.page-form .awesomplete > ul > li {
+    color: var(--refined-text);
+}
+
+.page-form .awesomplete > ul > li:hover,
+.page-form .awesomplete > ul > li[aria-selected="true"] {
+    color: var(--refined-bright);
+}
+
 .awesomplete mark,
 .awesomplete li:hover mark,
 .awesomplete li[aria-selected="true"] mark {

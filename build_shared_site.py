@@ -16,8 +16,8 @@ from site_shared import (
 
 
 STATIC_PAGES = {
-    ROOT / "index.html": ("home", ("github", "twitter", "resume")),
-    ROOT / "resume.html": ("resume", ()),
+    ROOT / "index.html": "home",
+    ROOT / "resume.html": None,
 }
 THEME_OUTPUTS = {
     ROOT / "style.css": "static",
@@ -25,10 +25,10 @@ THEME_OUTPUTS = {
 }
 
 
-def update_static_navigation(path, active, excluded_slugs):
+def update_static_navigation(path, active):
     content = path.read_text(encoding="utf-8")
-    start = f"<!-- GENERATED SITE NAVIGATION:START active={active} -->"
-    generated = render_site_header(active, excluded_slugs)
+    start = f"<!-- GENERATED SITE NAVIGATION:START active={active or 'none'} -->"
+    generated = render_site_header(active)
     inner = generated.removeprefix(start + "\n").removesuffix("\n" + NAVIGATION_END)
     write_if_changed(
         path,
@@ -37,8 +37,8 @@ def update_static_navigation(path, active, excluded_slugs):
 
 
 def main():
-    for path, (active, excluded_slugs) in STATIC_PAGES.items():
-        update_static_navigation(path, active, excluded_slugs)
+    for path, active in STATIC_PAGES.items():
+        update_static_navigation(path, active)
 
     for path, target in THEME_OUTPUTS.items():
         content = path.read_text(encoding="utf-8")

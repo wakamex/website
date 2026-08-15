@@ -170,32 +170,20 @@ pre {
         order: 1;
     }
 
-    .shaarli-menu .menu-transform > .pure-menu-list > li:has(> .site-navigation-github) {
+    .shaarli-menu .menu-transform > .pure-menu-list > li:has(> .site-navigation-blog) {
         order: 2;
     }
 
-    .shaarli-menu .menu-transform > .pure-menu-list > li:has(> .site-navigation-twitter) {
+    .shaarli-menu .menu-transform > .pure-menu-list > li:has(> .site-navigation-links) {
         order: 3;
     }
 
-    .shaarli-menu .menu-transform > .pure-menu-list > li:has(> .site-navigation-resume) {
+    .shaarli-menu .menu-transform > .pure-menu-list > li:has(> .site-navigation-autoresearch) {
         order: 4;
     }
 
-    .shaarli-menu .menu-transform > .pure-menu-list > li:has(> .site-navigation-blog) {
-        order: 5;
-    }
-
-    .shaarli-menu .menu-transform > .pure-menu-list > li:has(> .site-navigation-links) {
-        order: 6;
-    }
-
-    .shaarli-menu .menu-transform > .pure-menu-list > li:has(> .site-navigation-autoresearch) {
-        order: 7;
-    }
-
     .shaarli-menu .menu-transform > .pure-menu-list > li:has(> .site-navigation-status) {
-        order: 8;
+        order: 5;
     }
 
     .shaarli-menu .menu-transform > .pure-menu-list > li:has(> #shaarli-title-desktop) {

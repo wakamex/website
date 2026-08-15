@@ -42,19 +42,19 @@ def load_navigation() -> list[dict[str, str]]:
     return navigation
 
 
-def render_site_header(
-    active: str, secondary_slugs: tuple[str, ...] = ()
-) -> str:
+def render_site_header(active: str, excluded_slugs: tuple[str, ...] = ()) -> str:
     navigation = load_navigation()
     navigation_slugs = {item["slug"] for item in navigation}
     if active not in navigation_slugs:
         raise SharedSiteError(f"unknown active navigation slug: {active}")
-    unknown_secondary = set(secondary_slugs) - navigation_slugs
-    if unknown_secondary:
+    unknown_excluded = set(excluded_slugs) - navigation_slugs
+    if unknown_excluded:
         raise SharedSiteError(
-            "unknown secondary navigation slug: "
-            + ", ".join(sorted(unknown_secondary))
+            "unknown excluded navigation slug: "
+            + ", ".join(sorted(unknown_excluded))
         )
+    if active in excluded_slugs:
+        raise SharedSiteError(f"active navigation slug cannot be excluded: {active}")
 
     def render_links(items: list[dict[str, str]], indent: str) -> list[str]:
         links = []
@@ -70,33 +70,10 @@ def render_site_header(
             )
         return links
 
-    secondary_slug_set = set(secondary_slugs)
-    primary_items = [
-        item for item in navigation if item["slug"] not in secondary_slug_set
+    excluded_slug_set = set(excluded_slugs)
+    visible_items = [
+        item for item in navigation if item["slug"] not in excluded_slug_set
     ]
-    secondary_items = [
-        item for item in navigation if item["slug"] in secondary_slug_set
-    ]
-
-    if secondary_items:
-        return "\n".join(
-            [
-                NAVIGATION_START.format(active=active),
-                '    <header class="site-header site-header-two-row">',
-                '      <a class="site-header-title" href="/">Mihai Cosma</a>',
-                '      <button class="site-header-toggle" type="button" aria-controls="site-navigation" aria-expanded="false" aria-label="Menu" hidden><span class="bar"></span><span class="bar"></span></button>',
-                '      <div class="site-header-navigation" id="site-navigation">',
-                '        <nav class="links links-top" aria-label="Main navigation">',
-                *render_links(primary_items, "          "),
-                "        </nav>",
-                '        <nav class="links site-header-secondary" aria-label="Professional navigation">',
-                *render_links(secondary_items, "          "),
-                "        </nav>",
-                "      </div>",
-                "    </header>",
-                NAVIGATION_END,
-            ]
-        )
 
     return "\n".join(
         [
@@ -105,7 +82,7 @@ def render_site_header(
             '      <a class="site-header-title" href="/">Mihai Cosma</a>',
             '      <button class="site-header-toggle" type="button" aria-controls="site-navigation" aria-expanded="false" aria-label="Menu" hidden><span class="bar"></span><span class="bar"></span></button>',
             '      <nav class="links links-top" id="site-navigation" aria-label="Main navigation">',
-            *render_links(primary_items, "        "),
+            *render_links(visible_items, "        "),
             "      </nav>",
             "    </header>",
             NAVIGATION_END,

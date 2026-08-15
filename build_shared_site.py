@@ -25,10 +25,10 @@ THEME_OUTPUTS = {
 }
 
 
-def update_static_navigation(path, active, secondary_slugs):
+def update_static_navigation(path, active, excluded_slugs):
     content = path.read_text(encoding="utf-8")
     start = f"<!-- GENERATED SITE NAVIGATION:START active={active} -->"
-    generated = render_site_header(active, secondary_slugs)
+    generated = render_site_header(active, excluded_slugs)
     inner = generated.removeprefix(start + "\n").removesuffix("\n" + NAVIGATION_END)
     write_if_changed(
         path,
@@ -37,8 +37,8 @@ def update_static_navigation(path, active, secondary_slugs):
 
 
 def main():
-    for path, (active, secondary_slugs) in STATIC_PAGES.items():
-        update_static_navigation(path, active, secondary_slugs)
+    for path, (active, excluded_slugs) in STATIC_PAGES.items():
+        update_static_navigation(path, active, excluded_slugs)
 
     for path, target in THEME_OUTPUTS.items():
         content = path.read_text(encoding="utf-8")

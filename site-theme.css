@@ -64,20 +64,6 @@
     align-self: flex-start;
 }
 
-.site-header-secondary {
-    height: var(--site-header-row-height);
-    margin: 0;
-    padding: 0;
-    border: 0;
-    border-top: 1px solid var(--site-header-border-soft);
-    gap: 0;
-    align-items: stretch;
-}
-
-.site-header-secondary .site-navigation-link {
-    align-self: flex-start;
-}
-
 @media (max-width: 600px) {
     .site-header {
         min-height: var(--site-header-height);
@@ -167,54 +153,6 @@
         border-top: 1px solid var(--site-header-border-soft);
     }
 
-    .site-header-two-row.site-header-enabled .site-header-navigation {
-        display: none;
-    }
-
-    .site-header-two-row.site-header-enabled .links-top {
-        display: flex;
-    }
-
-    .site-header-two-row.site-header-enabled.open .site-header-navigation {
-        position: absolute;
-        top: var(--site-header-height);
-        right: 0;
-        left: 0;
-        display: flex;
-        max-height: calc(100vh - var(--site-header-height));
-        overflow-y: auto;
-        flex-direction: column;
-        flex-wrap: nowrap;
-        border-bottom: 1px solid var(--site-header-border);
-        background: var(--site-header-background);
-    }
-
-    .site-header-two-row.site-header-enabled.open .links-top,
-    .site-header-two-row.site-header-enabled.open .site-header-secondary {
-        position: static;
-        display: flex;
-        height: auto;
-        flex: none;
-        flex-direction: column;
-        flex-wrap: nowrap;
-        border-bottom: 0;
-    }
-
-    .site-header-two-row.site-header-enabled.open .site-header-secondary {
-        margin-top: 4px;
-        padding-top: 4px;
-        border-top: 1px solid var(--site-header-border);
-    }
-
-    .site-header-two-row.site-header-enabled .site-header-secondary .site-navigation-link {
-        display: flex;
-        align-items: center;
-        flex: 0 0 var(--site-header-height);
-        width: 100%;
-        height: var(--site-header-height);
-        padding: 0 16px;
-        border-top: 1px solid var(--site-header-border-soft);
-    }
 }
 
 @media print {

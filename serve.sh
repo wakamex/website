@@ -2,6 +2,7 @@
 set -e
 cd "$(dirname "$0")"
 
+python3 build_shared_site.py
 python3 build_blog.py
 python3 build_autoresearch.py --allow-stale-cache
 

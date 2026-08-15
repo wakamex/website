@@ -8,7 +8,7 @@ python3 build_blog.py
 python3 build_autoresearch.py --require-fresh
 
 # Top-level files: default set, or whatever the user passed.
-files="${@:-index.html autoresearch.html style.css resume.html status.html blog.html meters.js site-nav.js D2CodingLigature-web.woff2}"
+files="${@:-index.html autoresearch.html projects.html style.css resume.html status.html blog.html og-image.png meters.js site-nav.js D2CodingLigature-web.woff2}"
 gcloud compute scp $files mc-new:~ --zone=us-central1-a
 for f in $files; do
     gcloud compute ssh mc-new --zone=us-central1-a --command="sudo mv ~/${f##*/} /var/www/mihaicosma.com/"

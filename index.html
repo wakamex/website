@@ -3,17 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Mihai Cosma</title>
-    <meta name="description" content="Maximum agent velocity through experimentation. Agent harnesses, evals, and ML/RL research.">
+    <title>Mihai Cosma - Quantitative and AI Systems Practitioner</title>
+    <meta name="description" content="Senior quantitative practitioner building and evaluating AI agents, reinforcement-learning systems, and production software.">
     <meta property="og:title" content="Mihai Cosma">
-    <meta property="og:description" content="Maximum agent velocity through experimentation. Agent harnesses, evals, and ML/RL research.">
+    <meta property="og:description" content="Senior quantitative practitioner building and evaluating AI agents, reinforcement-learning systems, and production software.">
     <meta property="og:image" content="https://mihaicosma.com/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Mihai Cosma's quantitative and AI systems portfolio">
     <meta property="og:url" content="https://mihaicosma.com">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Mihai Cosma">
-    <meta name="twitter:description" content="Maximum agent velocity through experimentation. Agent harnesses, evals, and ML/RL research.">
+    <meta name="twitter:description" content="Senior quantitative practitioner building and evaluating AI agents, reinforcement-learning systems, and production software.">
     <meta name="twitter:image" content="https://mihaicosma.com/og-image.png">
+    <meta name="twitter:image:alt" content="Mihai Cosma's quantitative and AI systems portfolio">
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -35,6 +39,18 @@
 <!-- GENERATED SITE NAVIGATION:END -->
     <a href="/status.html" class="meters-link"><div class="meters" id="meters"></div></a>
     <h1>Mihai Cosma</h1>
+    <p class="tagline">Senior quantitative practitioner working across markets, software, and agent evaluation.</p>
+    <p class="intro profile-intro">I spent 12 years in Canada's foreign-reserve program, including co-leading a $20 billion non-USD credit portfolio, then built DeFi trading software and protocol-risk systems. I now build and audit agent-led research across ML/RL, simulation, inference, and software automation.</p>
+    <div class="profile-links" aria-label="Professional links">
+        <a href="/autoresearch.html">Autoresearch field reports</a>
+        <a href="/projects.html">Current project activity</a>
+    </div>
+    <ul class="profile-facts" aria-label="Selected experience and results">
+        <li><span class="profile-fact-value">12 years</span><span>in Canada's foreign-reserve program</span></li>
+        <li><span class="profile-fact-value">$20 billion</span><span>non-USD credit portfolio co-led</span></li>
+        <li><span class="profile-fact-value">10 campaigns</span><span>documented as applied field reports</span></li>
+        <li><span class="profile-fact-value">2.08x throughput</span><span>promoted to live transcription inference</span></li>
+    </ul>
 
     <!-- AUTORESEARCH:START -->
     <section class="featured-research" aria-labelledby="featured-research-title">
@@ -48,37 +64,18 @@
     </section>
     <!-- AUTORESEARCH:END -->
 
-    <h2>Agent Harnesses</h2>
-    <p class="section-note">Orchestration, memory, communication architectures</p>
-    <ul>
-        <li><a href="https://github.com/wakamex/panetone">panetone</a> 1-file Python bridge for 2-way communication with Claude/Codex/Gemini/OpenCode interactive sessions in wezterm-mux-server via Telegram/Signal/Slack. Launch multi-agent collaborative session via /collab.</li>
-        <li><a href="https://github.com/wakamex/swarmhost">swarmhost</a> multi-agent orchestration with dependency graphs, built by reverse-engineering Claude Code's /batch in &lt;12 hours. Stateless planner/worker/merger architecture with continuous task refill. Used to ship 15K LOC to prod in 26 hours.</li>
-        <li><a href="https://github.com/wakamex/longmem">longmem</a> ablation study on agent memory retrieval beats <a href="https://mastra.ai/docs/memory/observational-memory">Mastra-AI</a>'s LongMemEval SOTA with just embeddings and terse prompts. Novel application of <a href="https://huggingface.co/lightonai/ColBERT-Zero">ColBERT-Zero</a> for long-context retrieval. Conclusion is that complexity hurts.</li>
+    <h2>Selected Current Work</h2>
+    <p class="section-note">Public products, open-source infrastructure, and documented applied outcomes</p>
+    <ul class="current-work">
+        <li><a href="https://github.com/wakamex/agent-orchestration-process">Agent Orchestration Process</a> runs bounded unattended jobs across eight coding-agent CLIs. Its Python CLI isolates work, enforces deadlines and least-authority execution profiles, resumes exact provider sessions, validates declared artifacts, and retains durable evidence. <a href="https://pypi.org/project/agent-orchestration-process/">PyPI</a></li>
+        <li><a href="https://tactics.md">Tactics.md</a> used autoresearch to test 102 CPU-pipeline interventions, uncover eight correctness defects, and evaluate 435 neural-model result bundles. Under the same move budget, the model with the best validation loss played worst among matched candidates.</li>
+        <li><a href="https://freetranscribe.org">FreeTranscribe.org</a> is an AI transcription service with private transcript links, subscriptions, and a production-priority GPU queue. A sealed promotion doubled warm inference throughput on one shared RTX 3090 without increasing errors across 295 cases.</li>
+        <li><a href="https://github.com/wakamex/flysim">FlySim</a> is an Apache-licensed flight-control stack with a CPU reference environment and batched JAX reinforcement learning. Exact replay localized a simulation-to-live coverage gap, and retraining eliminated 14% control clipping without weakening the live safety limits.</li>
+        <li><a href="https://github.com/wakamex/clanker-analytics">Clanker Analytics</a> is a DuckDB-backed Python package for analyzing local Claude Code, Codex, and Gemini session logs. It powers my public <a href="/projects.html">project activity view</a>, which reports human attention, agent resources, and automation separately. <a href="https://pypi.org/project/clanker-analytics/">PyPI</a></li>
     </ul>
 
-    <h2>Evaluation & Affordances</h2>
-    <p class="section-note">Quantitative benchmarks, agent capabilities, automated evaluation</p>
-    <ul>
-        <li><a href="https://github.com/wakamex/mad">mad</a> novel eval benchmark for LLM agent memory and multi-step planning over long game sequences. Agents reach 91% of ceiling with memory, and match random score without.</li>
-        <li><a href="https://github.com/wakamex/human3090">human3090</a> maps the efficient frontier of local coding LLMs at the trailing edge of hardware on my 3090.</li>
-        <li><a href="https://github.com/wakamex/search-claude-history">search-claude-history</a> lets Claude efficiently search session history through a simple CLI tool.</li>
-        <li><a href="https://redvsblue.fyi">redvsblue.fyi</a> reproducible economic analysis of US Presidential control on 83 economic metrics.</li>
-    </ul>
-
-    <h2>ML/RL Research</h2>
-    <p class="section-note">Novel architectures, reinforcement learning, empirical results</p>
-    <ul>
-        <li><a href="https://github.com/wakamex/rc">reservoir computing for LLMs</a> adds ESN sidecar to Qwen3.5-0.8B. 3x average exact-match across 23 benchmarks (0.12→0.36) at negligible perplexity cost (+0.3%). Perfect on passkey retrieval, near-perfect on multi-digit arithmetic, strong gains on variable tracking and program tracing. Kicked off with <a href="https://mihaicosma.com/rc.html">/collab</a>.</li>
-        <li><a href="https://github.com/wakamex/mnk">mnk</a>-game AlphaZero-style in Rust. Checkpoint transfer worked, but the campaign did not establish an advantage over matched scratch training. Hyperparameter sweeps and 75x speedup over reference Python, but improvements don't stack.</li>
-        <li><a href="https://github.com/wakamex/spillage">energy spillage</a> attempt to repurpose ICLR 2026 hallucination metric for test-time tree search. <a href="https://mihaicosma.com/spillage.html">/collab</a> for research design. Found energy spillage is confidence proxy, and underperforms min(log_prob). Killed via predefined go/no-go gates.</li>
-    </ul>
-
-    <h2>Things I Built</h2>
-    <ul>
-        <li><a href="https://gitrep.fyi">gitrep.fyi</a> star-based reputation scores for GitHub contributors. Sort issues and PRs by who filed them, not just when. Plus star histories and agent-friendly unlimited API.</li>
-        <li><a href="https://github.com/wakamex/clanker-analytics">clanker-analytics</a> token usage analytics for AI coding tools. Reads local session logs from Claude Code, Codex, and Gemini CLI with per-project breakdowns using DuckDB. <a href="https://pypi.org/project/clanker-analytics/">uv tool install clanker-analytics</a>.</li>
-        <li><a href="https://github.com/wakamex/wakterm">wakterm</a> fork of WezTerm that makes Claude/Codex/Gemini/OpenCode first-class terminal citizens. Agent lifecycle CLI, turn-state tracking, session persistence, and 26 upstream bug fixes. The terminal layer underneath panetone.</li>
-    </ul>
+    <h2>Professional Foundation</h2>
+    <p class="professional-foundation">At the Bank of Canada, I worked across trading, portfolio management, quantitative modelling, and policy before co-leading a $20 billion non-USD credit portfolio. At DELV, Euler, and Veda, I built Python trading and fuzzing infrastructure, worked on market strategy, and analyzed protocol risk using on-chain and internal data. <a href="/resume.html">Full resume</a></p>
 
     <script src="/meters.js"></script>
     <script src="/site-nav.js"></script>

@@ -25,6 +25,8 @@ Generated HTML and CSS blocks are marked as generated and should not be edited d
 4. Run `./deploy.sh` for a full deployment. It updates both the static site and Shaarli.
 
 The normal deployment also rebuilds Blog and Autoresearch. Shaarli PHP files are syntax-checked on the server before installation.
+The Shaarli deployment builds one content-hashed stylesheet from the installed Shaarli base and Markdown CSS followed by the generated site refinements. The page references only that bundle, preventing the stock theme from rendering while a separate override is still loading, and the old `data/user.css` override is removed.
+It also derives an inline SVG sprite from Shaarli's installed ForkAwesome SVG font, replaces icon-font markup across templates and plugins, and removes the external font source from the CSS bundle.
 
 ## What is already centralized
 
@@ -32,6 +34,7 @@ The normal deployment also rebuilds Blog and Autoresearch. Shaarli PHP files are
 - Header colors, borders, dimensions, link states, and active-state treatment.
 - Static and Shaarli active-page generation.
 - Static and Shaarli deployment through the full deployment path.
+- Automatic Shaarli CSS bundling and cache invalidation during deployment.
 - Basic navigation-source validation and deterministic generation.
 - One standard navigation set across the main site, Blog, and Shaarli.
 

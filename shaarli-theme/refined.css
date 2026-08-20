@@ -19,6 +19,50 @@
     --refined-success: #6b8f5e;
 }
 
+.svg-icon-sprite {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+}
+
+.svg-icon {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    overflow: visible;
+    vertical-align: -0.125em;
+    fill: currentColor;
+}
+
+.svg-icon::before {
+    content: none !important;
+}
+
+.svg-icon use {
+    pointer-events: none;
+}
+
+.fa-chevron-up .svg-icon-chevron-down,
+.fa-chevron-down .svg-icon-chevron-up {
+    display: none;
+}
+
+.server-tables-page .svg-icon.fa-color-green,
+.server-tables .svg-icon.fa-color-green {
+    color: #1b926c;
+}
+
+.server-tables-page .svg-icon.fa-color-orange,
+.server-tables .svg-icon.fa-color-orange {
+    color: #f89406;
+}
+
+.server-tables-page .svg-icon.fa-color-red,
+.server-tables .svg-icon.fa-color-red {
+    color: #ac2925;
+}
+
 *,
 *::before,
 *::after {

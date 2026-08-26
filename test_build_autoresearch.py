@@ -123,6 +123,17 @@ class AutoresearchBuildTests(unittest.TestCase):
         self.assertNotIn("Projects:", rendered)
         self.assertNotIn("Read report", rendered)
 
+    def test_collection_description_omits_redundant_count_and_order(self):
+        feed = copy.deepcopy(self.feed)
+        feed["description"] = (
+            "2 chronological field reports on using autoresearch in applied projects."
+        )
+        rendered = builder.render_collection(builder.validate_feed(feed))
+        self.assertIn(
+            "Field reports on using autoresearch in applied projects.", rendered
+        )
+        self.assertNotIn("2 chronological field reports", rendered)
+
     def test_duplicate_case_numbers_fail(self):
         feed = copy.deepcopy(self.feed)
         feed["cases"][1]["case"] = feed["cases"][0]["case"]

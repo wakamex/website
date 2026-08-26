@@ -293,6 +293,11 @@ def render_case(case: dict[str, Any]) -> str:
 
 def render_collection(data: dict[str, Any], warning: str | None = None) -> str:
     cases = sorted(data["cases"], key=lambda case: case["case"])
+    description = data["description"]
+    redundant_prefix = f"{len(cases)} chronological "
+    if description.startswith(redundant_prefix):
+        description = description.removeprefix(redundant_prefix)
+        description = description[:1].upper() + description[1:]
     first_started = min(case["started"] for case in cases)
     last_ended = max(case["ended"] for case in cases)
     entries = "\n".join(render_case(case) for case in cases)
@@ -302,7 +307,7 @@ def render_collection(data: dict[str, Any], warning: str | None = None) -> str:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{esc(data["title"])} - Mihai Cosma</title>
-    <meta name="description" content="{esc(data["description"])}">
+    <meta name="description" content="{esc(description)}">
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -311,7 +316,7 @@ def render_collection(data: dict[str, Any], warning: str | None = None) -> str:
     <main class="autoresearch">
         <header class="research-header">
             <h1>{esc(data["title"])}</h1>
-            <p class="research-description">{esc(data["description"])}</p>
+            <p class="research-description">{esc(description)}</p>
             <p class="research-overview">{len(cases)} cases <span aria-hidden="true">//</span> {esc(first_started)} - {esc(last_ended)}</p>
         </header>
 {render_warning(warning)}        <div class="research-list research-list-complete">

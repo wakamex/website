@@ -12,7 +12,7 @@ echo "Building Autoresearch pages..."
 python3 build_autoresearch.py --require-fresh
 
 # Top-level files: default set, or whatever the user passed.
-files="${@:-index.html autoresearch.html projects.html style.css resume.html status.html blog.html og-image.png meters.js site-nav.js D2CodingLigature-web.woff2}"
+files="${@:-index.html autoresearch.html projects.html style.css resume.html status.html blog.html og-image.png meters.js site-nav.js D2CodingLigature-web.woff2 youtube-cli-uploader-demo.cast}"
 echo "Uploading top-level site files..."
 gcloud compute scp $files mc-new:~ --zone=us-central1-a
 

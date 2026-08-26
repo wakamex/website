@@ -2,6 +2,8 @@
 set -e
 cd "$(dirname "$0")"
 
+build_started_at=$(date +%s.%N)
+
 echo "Building shared navigation and themes..."
 python3 build_shared_site.py
 
@@ -10,6 +12,10 @@ python3 build_blog.py
 
 echo "Building Autoresearch pages..."
 python3 build_autoresearch.py --require-fresh
+
+build_finished_at=$(date +%s.%N)
+build_elapsed=$(awk -v start="$build_started_at" -v finish="$build_finished_at" 'BEGIN { printf "%.2f", finish - start }')
+echo "Built in $build_elapsed seconds"
 
 # Top-level files: default set, or whatever the user passed.
 files="${@:-index.html autoresearch.html projects.html style.css resume.html status.html blog.html og-image.png meters.js site-nav.js D2CodingLigature-web.woff2 youtube-cli-uploader-demo.cast}"

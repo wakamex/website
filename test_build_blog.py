@@ -1,3 +1,4 @@
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -43,24 +44,72 @@ class BlogBuildTests(unittest.TestCase):
 
     def test_build_writes_canonical_index_and_legacy_redirect(self):
         original_root = builder.ROOT
-        original_blog_dir = builder.BLOG_DIR
+        original_blog_repo = builder.BLOG_REPO
+        original_blog_output_dir = builder.BLOG_OUTPUT_DIR
         with tempfile.TemporaryDirectory() as directory:
             try:
                 builder.ROOT = Path(directory)
-                builder.BLOG_DIR = builder.ROOT / "blog"
-                builder.BLOG_DIR.mkdir()
-                (builder.BLOG_DIR / "2026-08-21-demo.md").write_text("# Demo\n")
+                builder.BLOG_REPO = builder.ROOT / "source"
+                builder.BLOG_OUTPUT_DIR = builder.ROOT / "blog"
+                builder.BLOG_REPO.mkdir()
+                subprocess.run(
+                    ["git", "init", "-q", str(builder.BLOG_REPO)], check=True
+                )
+                subprocess.run(
+                    ["git", "-C", str(builder.BLOG_REPO), "config", "user.name", "Test"],
+                    check=True,
+                )
+                subprocess.run(
+                    [
+                        "git",
+                        "-C",
+                        str(builder.BLOG_REPO),
+                        "config",
+                        "user.email",
+                        "test@example.com",
+                    ],
+                    check=True,
+                )
+                source = builder.BLOG_REPO / "2026-08-21-demo.md"
+                source.write_text("# Committed title\n")
+                subprocess.run(
+                    ["git", "-C", str(builder.BLOG_REPO), "add", source.name],
+                    check=True,
+                )
+                subprocess.run(
+                    ["git", "-C", str(builder.BLOG_REPO), "commit", "-qm", "Initial"],
+                    check=True,
+                )
+                source.write_text("# Uncommitted edit\n")
+                draft = builder.BLOG_REPO / "2026-08-22-draft.md"
+                draft.write_text("# Staged draft\n")
+                subprocess.run(
+                    ["git", "-C", str(builder.BLOG_REPO), "add", draft.name],
+                    check=True,
+                )
+                (builder.BLOG_REPO / "2026-08-23-scratch.md").write_text(
+                    "# Untracked draft\n"
+                )
+                builder.BLOG_OUTPUT_DIR.mkdir()
+                (builder.BLOG_OUTPUT_DIR / "stale.html").write_text("stale")
 
                 builder.main()
 
-                index = (builder.BLOG_DIR / "index.html").read_text()
+                index = (builder.BLOG_OUTPUT_DIR / "index.html").read_text()
                 redirect = (builder.ROOT / "blog.html").read_text()
+                rendered = (builder.BLOG_OUTPUT_DIR / "demo.html").read_text()
                 self.assertIn('href="/blog/demo.html"', index)
+                self.assertIn("Committed title", rendered)
+                self.assertNotIn("Uncommitted edit", rendered)
+                self.assertNotIn("Staged draft", index)
+                self.assertNotIn("Untracked draft", index)
+                self.assertFalse((builder.BLOG_OUTPUT_DIR / "stale.html").exists())
                 self.assertIn('rel="canonical" href="/blog/"', redirect)
                 self.assertIn('content="0; url=/blog/"', redirect)
             finally:
                 builder.ROOT = original_root
-                builder.BLOG_DIR = original_blog_dir
+                builder.BLOG_REPO = original_blog_repo
+                builder.BLOG_OUTPUT_DIR = original_blog_output_dir
 
 
 if __name__ == "__main__":

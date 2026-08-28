@@ -2,6 +2,7 @@
 """Build blog/*.md -> blog/*.html and regenerate the blog index."""
 import html
 import re
+import subprocess
 from pathlib import Path
 
 import markdown
@@ -9,7 +10,8 @@ import markdown
 from site_shared import render_site_header
 
 ROOT = Path(__file__).parent
-BLOG_DIR = ROOT / "blog"
+BLOG_REPO = Path("/code/blog")
+BLOG_OUTPUT_DIR = ROOT / "blog"
 FILENAME_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})-(.+)\.md$")
 ASCIINEMA_SHORTCODE_RE = re.compile(
     r'^[ \t]*\{\{\s*asciinema\("([^"\r\n]+)"\)\s*\}\}[ \t]*$', re.MULTILINE
@@ -95,15 +97,14 @@ LEGACY_REDIRECT = """<!DOCTYPE html>
 """
 
 
-def parse_post(path: Path):
-    m = FILENAME_RE.match(path.name)
+def parse_post_text(filename: str, text: str):
+    m = FILENAME_RE.match(filename)
     if not m:
-        raise ValueError(f"bad filename (need YYYY-MM-DD-slug.md): {path.name}")
+        raise ValueError(f"bad filename (need YYYY-MM-DD-slug.md): {filename}")
     date_str, slug = m.group(1), m.group(2)
-    text = path.read_text()
     title_match = re.match(r"#\s+(.+)", text)
     if not title_match:
-        raise ValueError(f"{path.name}: first line must be '# Title'")
+        raise ValueError(f"{filename}: first line must be '# Title'")
     title = title_match.group(1).strip()
     body_md = text[title_match.end():].lstrip("\n")
     body_md = ASCIINEMA_SHORTCODE_RE.sub(
@@ -112,10 +113,35 @@ def parse_post(path: Path):
     )
     if re.search(r"\{\{\s*asciinema\b", body_md):
         raise ValueError(
-            f'{path.name}: invalid asciinema shortcode; use {{{{ asciinema("/demo.cast") }}}}'
+            f'{filename}: invalid asciinema shortcode; use '
+            f'{{{{ asciinema("/demo.cast") }}}}'
         )
     body_html = markdown.markdown(body_md, extensions=["fenced_code", "tables"])
     return date_str, slug, title, body_html
+
+
+def parse_post(path: Path):
+    return parse_post_text(path.name, path.read_text())
+
+
+def committed_markdown(repo: Path):
+    names = subprocess.check_output(
+        [
+            "git",
+            "-C",
+            str(repo),
+            "ls-tree",
+            "-r",
+            "-z",
+            "--name-only",
+            "HEAD",
+        ]
+    ).decode().split("\0")
+    for name in sorted(name for name in names if name.endswith(".md")):
+        text = subprocess.check_output(
+            ["git", "-C", str(repo), "show", f"HEAD:{name}"], text=True
+        )
+        yield name, text
 
 
 def render_post(date_str, title, body):
@@ -130,12 +156,15 @@ def render_post(date_str, title, body):
 
 
 def main():
-    BLOG_DIR.mkdir(exist_ok=True)
+    BLOG_OUTPUT_DIR.mkdir(exist_ok=True)
+    for path in BLOG_OUTPUT_DIR.glob("*.html"):
+        path.unlink()
+
     posts = []
-    for path in sorted(BLOG_DIR.glob("*.md")):
-        date_str, slug, title, body = parse_post(path)
+    for filename, text in committed_markdown(BLOG_REPO):
+        date_str, slug, title, body = parse_post_text(filename, text)
         rendered = render_post(date_str, title, body)
-        (BLOG_DIR / f"{slug}.html").write_text(rendered)
+        (BLOG_OUTPUT_DIR / f"{slug}.html").write_text(rendered)
         posts.append((date_str, slug, title))
 
     posts.sort(reverse=True)
@@ -143,7 +172,7 @@ def main():
         f'        <li><span class="post-list-date">{d}</span><a href="/blog/{s}.html">{t}</a></li>'
         for d, s, t in posts
     ) or '        <li class="post-list-empty">no posts yet</li>'
-    (BLOG_DIR / "index.html").write_text(INDEX_TEMPLATE.format(items=items))
+    (BLOG_OUTPUT_DIR / "index.html").write_text(INDEX_TEMPLATE.format(items=items))
     (ROOT / "blog.html").write_text(LEGACY_REDIRECT)
     print(f"built {len(posts)} post(s)")
 

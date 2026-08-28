@@ -27,17 +27,17 @@ for f in $files; do
     gcloud compute ssh mc-new --zone=us-central1-a --command="sudo mv ~/${f##*/} /var/www/mihaicosma.com/"
 done
 
-# Post HTML: only sync when running the default deploy (no args).
+# Blog HTML: only sync when running the default deploy (no args).
 if [ $# -eq 0 ]; then
-    post_files=(posts/*.html)
-    if [ -e "${post_files[0]}" ]; then
-        echo "Uploading ${#post_files[@]} generated blog post(s)..."
-        gcloud compute ssh mc-new --zone=us-central1-a --command="sudo mkdir -p /var/www/mihaicosma.com/posts"
-        gcloud compute scp "${post_files[@]}" mc-new:~ --zone=us-central1-a
+    blog_files=(blog/*.html)
+    if [ -e "${blog_files[0]}" ]; then
+        echo "Uploading ${#blog_files[@]} generated blog post(s)..."
+        gcloud compute ssh mc-new --zone=us-central1-a --command="sudo mkdir -p /var/www/mihaicosma.com/blog"
+        gcloud compute scp "${blog_files[@]}" mc-new:~ --zone=us-central1-a
 
         echo "Installing generated blog posts on the server..."
-        for f in "${post_files[@]}"; do
-            gcloud compute ssh mc-new --zone=us-central1-a --command="sudo mv ~/${f##*/} /var/www/mihaicosma.com/posts/"
+        for f in "${blog_files[@]}"; do
+            gcloud compute ssh mc-new --zone=us-central1-a --command="sudo mv ~/${f##*/} /var/www/mihaicosma.com/blog/"
         done
     fi
 

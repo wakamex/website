@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build posts/*.md -> posts/*.html, regenerate blog.html index."""
+"""Build blog/*.md -> blog/*.html and regenerate the blog index."""
 import html
 import re
 from pathlib import Path
@@ -9,7 +9,7 @@ import markdown
 from site_shared import render_site_header
 
 ROOT = Path(__file__).parent
-POSTS_DIR = ROOT / "posts"
+BLOG_DIR = ROOT / "blog"
 FILENAME_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})-(.+)\.md$")
 ASCIINEMA_SHORTCODE_RE = re.compile(
     r'^[ \t]*\{\{\s*asciinema\("([^"\r\n]+)"\)\s*\}\}[ \t]*$', re.MULTILINE
@@ -79,6 +79,21 @@ INDEX_TEMPLATE = f"""<!DOCTYPE html>
 </html>
 """
 
+LEGACY_REDIRECT = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Blog - Mihai Cosma</title>
+    <link rel="canonical" href="/blog/">
+    <meta http-equiv="refresh" content="0; url=/blog/">
+</head>
+<body>
+    <p><a href="/blog/">Continue to the blog</a></p>
+</body>
+</html>
+"""
+
 
 def parse_post(path: Path):
     m = FILENAME_RE.match(path.name)
@@ -115,20 +130,21 @@ def render_post(date_str, title, body):
 
 
 def main():
-    POSTS_DIR.mkdir(exist_ok=True)
+    BLOG_DIR.mkdir(exist_ok=True)
     posts = []
-    for path in sorted(POSTS_DIR.glob("*.md")):
+    for path in sorted(BLOG_DIR.glob("*.md")):
         date_str, slug, title, body = parse_post(path)
         rendered = render_post(date_str, title, body)
-        (POSTS_DIR / f"{slug}.html").write_text(rendered)
+        (BLOG_DIR / f"{slug}.html").write_text(rendered)
         posts.append((date_str, slug, title))
 
     posts.sort(reverse=True)
     items = "\n".join(
-        f'        <li><span class="post-list-date">{d}</span><a href="/posts/{s}.html">{t}</a></li>'
+        f'        <li><span class="post-list-date">{d}</span><a href="/blog/{s}.html">{t}</a></li>'
         for d, s, t in posts
     ) or '        <li class="post-list-empty">no posts yet</li>'
-    (ROOT / "blog.html").write_text(INDEX_TEMPLATE.format(items=items))
+    (BLOG_DIR / "index.html").write_text(INDEX_TEMPLATE.format(items=items))
+    (ROOT / "blog.html").write_text(LEGACY_REDIRECT)
     print(f"built {len(posts)} post(s)")
 
 

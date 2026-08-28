@@ -1,5 +1,5 @@
 usage.json
-posts/*.html
+blog/*.html
 blog.html
 .env
 .private/

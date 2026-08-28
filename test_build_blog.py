@@ -41,6 +41,27 @@ class BlogBuildTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "invalid asciinema shortcode"):
             self.parse("{{ asciinema(/demo.cast) }}")
 
+    def test_build_writes_canonical_index_and_legacy_redirect(self):
+        original_root = builder.ROOT
+        original_blog_dir = builder.BLOG_DIR
+        with tempfile.TemporaryDirectory() as directory:
+            try:
+                builder.ROOT = Path(directory)
+                builder.BLOG_DIR = builder.ROOT / "blog"
+                builder.BLOG_DIR.mkdir()
+                (builder.BLOG_DIR / "2026-08-21-demo.md").write_text("# Demo\n")
+
+                builder.main()
+
+                index = (builder.BLOG_DIR / "index.html").read_text()
+                redirect = (builder.ROOT / "blog.html").read_text()
+                self.assertIn('href="/blog/demo.html"', index)
+                self.assertIn('rel="canonical" href="/blog/"', redirect)
+                self.assertIn('content="0; url=/blog/"', redirect)
+            finally:
+                builder.ROOT = original_root
+                builder.BLOG_DIR = original_blog_dir
+
 
 if __name__ == "__main__":
     unittest.main()

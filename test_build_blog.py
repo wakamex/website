@@ -42,6 +42,14 @@ class BlogBuildTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "invalid asciinema shortcode"):
             self.parse("{{ asciinema(/demo.cast) }}")
 
+    def test_heading_ids_support_intra_post_links(self):
+        _, _, _, body = self.parse(
+            "See the [effective rate](#effective_rate).\n\n## Effective rate"
+        )
+
+        self.assertIn('<a href="#effective_rate">effective rate</a>', body)
+        self.assertIn('<h2 id="effective_rate">Effective rate</h2>', body)
+
     def test_build_writes_canonical_index_and_legacy_redirect(self):
         original_root = builder.ROOT
         original_blog_repo = builder.BLOG_REPO

@@ -116,7 +116,11 @@ def parse_post_text(filename: str, text: str):
             f'{filename}: invalid asciinema shortcode; use '
             f'{{{{ asciinema("/demo.cast") }}}}'
         )
-    body_html = markdown.markdown(body_md, extensions=["fenced_code", "tables"])
+    body_html = markdown.markdown(
+        body_md,
+        extensions=["fenced_code", "tables", "toc"],
+        extension_configs={"toc": {"separator": "_"}},
+    )
     return date_str, slug, title, body_html
 
 

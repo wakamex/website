@@ -7,7 +7,7 @@ from pathlib import Path
 
 import markdown
 
-from site_shared import render_site_header
+from site_shared import render_site_header, write_if_changed
 
 ROOT = Path(__file__).parent
 BLOG_REPO = Path("/code/blog")
@@ -161,14 +161,14 @@ def render_post(date_str, title, body):
 
 def main():
     BLOG_OUTPUT_DIR.mkdir(exist_ok=True)
-    for path in BLOG_OUTPUT_DIR.glob("*.html"):
-        path.unlink()
-
+    expected_outputs = set()
     posts = []
     for filename, text in committed_markdown(BLOG_REPO):
         date_str, slug, title, body = parse_post_text(filename, text)
         rendered = render_post(date_str, title, body)
-        (BLOG_OUTPUT_DIR / f"{slug}.html").write_text(rendered)
+        output = BLOG_OUTPUT_DIR / f"{slug}.html"
+        write_if_changed(output, rendered)
+        expected_outputs.add(output)
         posts.append((date_str, slug, title))
 
     posts.sort(reverse=True)
@@ -176,8 +176,13 @@ def main():
         f'        <li><span class="post-list-date">{d}</span><a href="/blog/{s}.html">{t}</a></li>'
         for d, s, t in posts
     ) or '        <li class="post-list-empty">no posts yet</li>'
-    (BLOG_OUTPUT_DIR / "index.html").write_text(INDEX_TEMPLATE.format(items=items))
-    (ROOT / "blog.html").write_text(LEGACY_REDIRECT)
+    index_output = BLOG_OUTPUT_DIR / "index.html"
+    write_if_changed(index_output, INDEX_TEMPLATE.format(items=items))
+    expected_outputs.add(index_output)
+    for path in BLOG_OUTPUT_DIR.glob("*.html"):
+        if path not in expected_outputs:
+            path.unlink()
+    write_if_changed(ROOT / "blog.html", LEGACY_REDIRECT)
     print(f"built {len(posts)} post(s)")
 
 

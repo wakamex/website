@@ -1,3 +1,4 @@
+import os
 import subprocess
 import tempfile
 import unittest
@@ -114,6 +115,20 @@ class BlogBuildTests(unittest.TestCase):
                 self.assertFalse((builder.BLOG_OUTPUT_DIR / "stale.html").exists())
                 self.assertIn('rel="canonical" href="/blog/"', redirect)
                 self.assertIn('content="0; url=/blog/"', redirect)
+
+                outputs = [
+                    builder.BLOG_OUTPUT_DIR / "demo.html",
+                    builder.BLOG_OUTPUT_DIR / "index.html",
+                    builder.ROOT / "blog.html",
+                ]
+                preserved_mtime = 1_000_000_000
+                for output in outputs:
+                    os.utime(output, ns=(preserved_mtime, preserved_mtime))
+
+                builder.main()
+
+                for output in outputs:
+                    self.assertEqual(preserved_mtime, output.stat().st_mtime_ns)
             finally:
                 builder.ROOT = original_root
                 builder.BLOG_REPO = original_blog_repo

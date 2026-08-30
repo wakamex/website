@@ -1,9 +1,18 @@
 #!/bin/bash
+set -e
+
 # Generate usage.json from daemon caches and deploy to server
 CLAUDE=~/.claude/usage-limits.json
 CODEX=~/.codex/usage-limits.json
 AGY=~/.gemini/antigravity-cli/usage-limits.json
 OUT=/tmp/usage.json
+PARSYNC=/code/parsync-local-to-remote/target/release/parsync
+REMOTE=mc:/var/www/mihaicosma.com
+
+if [ ! -x "$PARSYNC" ]; then
+    echo "Missing executable parsync branch build: $PARSYNC" >&2
+    exit 1
+fi
 
 publish() {
     python3 -c "
@@ -16,8 +25,7 @@ for key, path in [('claude', '$CLAUDE'), ('codex', '$CODEX'), ('agy', '$AGY')]:
 json.dump(out, sys.stdout)
 " > "$OUT"
 
-    gcloud compute scp "$OUT" mc-new:~ --zone=us-central1-a 2>/dev/null
-    gcloud compute ssh mc-new --zone=us-central1-a --command="sudo mv ~/usage.json /var/www/mihaicosma.com/" 2>/dev/null
+    "$PARSYNC" -rP --verify-existing "$OUT" "$REMOTE" >/dev/null 2>&1
     echo "[$(date +%H:%M:%S)] published"
 }
 

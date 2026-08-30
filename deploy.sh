@@ -34,11 +34,15 @@ else
 fi
 
 deploy_stage=$(mktemp -d)
+staged_files=()
 cleanup_stage() {
-    for staged_file in "$deploy_stage"/*; do
+    for staged_file in "${staged_files[@]}"; do
         [ -e "$staged_file" ] || continue
         unlink "$staged_file"
     done
+    if [ -d "$deploy_stage/blog" ]; then
+        rmdir "$deploy_stage/blog"
+    fi
     rmdir "$deploy_stage"
 }
 trap cleanup_stage EXIT
@@ -48,28 +52,35 @@ for file in "${files[@]}"; do
         echo "Top-level deployment file not found: $file" >&2
         exit 1
     fi
-    cp -p -- "$file" "$deploy_stage/${file##*/}"
+    staged_file="$deploy_stage/${file##*/}"
+    cp -p -- "$file" "$staged_file"
+    staged_files+=("$staged_file")
 done
 
-upload_started_at=$(date +%s.%N)
-
-echo "Uploading top-level site files..."
-"$parsync_bin" -rP --verify-existing "$deploy_stage/*" "$remote_root"
-cleanup_stage
-trap - EXIT
-
-# Blog HTML: only sync when running the default deploy (no args).
+# Blog HTML: only include when running the default deploy (no args).
 if [ $# -eq 0 ]; then
     blog_files=(blog/*.html)
     if [ -e "${blog_files[0]}" ]; then
-        echo "Uploading ${#blog_files[@]} generated blog post(s)..."
-        "$parsync_bin" -rP --verify-existing "$PWD/blog/*" "$remote_root/blog"
+        mkdir "$deploy_stage/blog"
+        for file in "${blog_files[@]}"; do
+            staged_file="$deploy_stage/blog/${file##*/}"
+            cp -p -- "$file" "$staged_file"
+            staged_files+=("$staged_file")
+        done
     fi
 fi
+
+upload_started_at=$(date +%s.%N)
+
+echo "Uploading ${#staged_files[@]} site files..."
+"$parsync_bin" -rP --verify-existing "$deploy_stage/*" "$remote_root"
 
 upload_finished_at=$(date +%s.%N)
 upload_elapsed=$(awk -v start="$upload_started_at" -v finish="$upload_finished_at" 'BEGIN { printf "%.2f", finish - start }')
 echo "Uploads completed in $upload_elapsed seconds"
+
+cleanup_stage
+trap - EXIT
 
 if [ $# -eq 0 ]; then
     # Keep Shaarli's generated navigation and header theme in sync.

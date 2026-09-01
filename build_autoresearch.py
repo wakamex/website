@@ -338,20 +338,27 @@ def replace_featured(index_html: str, section: str) -> str:
     return f"{before}{START_MARKER}\n{section}\n{END_MARKER}{after}"
 
 
-def write_if_changed(path: Path, content: str) -> None:
+def write_if_changed(path: Path, content: str) -> bool:
     if path.exists() and path.read_text(encoding="utf-8") == content:
-        return
+        return False
     path.write_text(content, encoding="utf-8")
+    return True
 
 
-def build(data: dict[str, Any], root: Path = ROOT, warning: str | None = None) -> None:
+def build(data: dict[str, Any], root: Path = ROOT, warning: str | None = None) -> int:
     data = validate_feed(data)
     index_path = root / "index.html"
     index_html = replace_featured(
         index_path.read_text(encoding="utf-8"), render_featured(data, warning)
     )
-    write_if_changed(index_path, index_html)
-    write_if_changed(root / "autoresearch.html", render_collection(data, warning))
+    return sum(
+        (
+            write_if_changed(index_path, index_html),
+            write_if_changed(
+                root / "autoresearch.html", render_collection(data, warning)
+            ),
+        )
+    )
 
 
 def parse_args() -> argparse.Namespace:
@@ -384,13 +391,16 @@ def main() -> int:
             allow_stale_cache=args.allow_stale_cache,
             cache_path=args.cache,
         )
-        build(data, warning=warning)
+        files_written = build(data, warning=warning)
     except (FeedError, OSError) as exc:
         print(f"autoresearch build failed: {exc}", file=sys.stderr)
         return 1
     if stale:
         print(f"WARNING: {warning}", file=sys.stderr)
-    print(f"built {len(data['cases'])} Autoresearch case studies")
+    print(
+        f"checked {len(data['cases'])} Autoresearch case studies, "
+        f"wrote {files_written} file(s)"
+    )
     return 0
 
 

@@ -162,12 +162,13 @@ def render_post(date_str, title, body):
 def main():
     BLOG_OUTPUT_DIR.mkdir(exist_ok=True)
     expected_outputs = set()
+    files_written = 0
     posts = []
     for filename, text in committed_markdown(BLOG_REPO):
         date_str, slug, title, body = parse_post_text(filename, text)
         rendered = render_post(date_str, title, body)
         output = BLOG_OUTPUT_DIR / f"{slug}.html"
-        write_if_changed(output, rendered)
+        files_written += write_if_changed(output, rendered)
         expected_outputs.add(output)
         posts.append((date_str, slug, title))
 
@@ -177,13 +178,13 @@ def main():
         for d, s, t in posts
     ) or '        <li class="post-list-empty">no posts yet</li>'
     index_output = BLOG_OUTPUT_DIR / "index.html"
-    write_if_changed(index_output, INDEX_TEMPLATE.format(items=items))
+    files_written += write_if_changed(index_output, INDEX_TEMPLATE.format(items=items))
     expected_outputs.add(index_output)
     for path in BLOG_OUTPUT_DIR.glob("*.html"):
         if path not in expected_outputs:
             path.unlink()
-    write_if_changed(ROOT / "blog.html", LEGACY_REDIRECT)
-    print(f"built {len(posts)} post(s)")
+    files_written += write_if_changed(ROOT / "blog.html", LEGACY_REDIRECT)
+    print(f"checked {len(posts)} post(s), wrote {files_written} file(s)")
 
 
 if __name__ == "__main__":

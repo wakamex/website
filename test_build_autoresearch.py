@@ -1,4 +1,5 @@
 import copy
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -182,17 +183,22 @@ class AutoresearchBuildTests(unittest.TestCase):
                 f"before\n{builder.START_MARKER}\nold\n{builder.END_MARKER}\nafter\n",
                 encoding="utf-8",
             )
-            builder.build(copy.deepcopy(self.feed), root)
+            self.assertEqual(2, builder.build(copy.deepcopy(self.feed), root))
             first = {
                 path.name: path.read_bytes()
                 for path in (root / "index.html", root / "autoresearch.html")
             }
-            builder.build(copy.deepcopy(self.feed), root)
+            preserved_mtime = 1_000_000_000
+            for path in (root / "index.html", root / "autoresearch.html"):
+                os.utime(path, ns=(preserved_mtime, preserved_mtime))
+            self.assertEqual(0, builder.build(copy.deepcopy(self.feed), root))
             second = {
                 path.name: path.read_bytes()
                 for path in (root / "index.html", root / "autoresearch.html")
             }
             self.assertEqual(first, second)
+            for path in (root / "index.html", root / "autoresearch.html"):
+                self.assertEqual(preserved_mtime, path.stat().st_mtime_ns)
 
 
 if __name__ == "__main__":

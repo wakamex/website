@@ -139,7 +139,8 @@ def replace_generated_block(content: str, start: str, end: str, generated: str) 
     return f"{before}{start}\n{generated}\n{end}{after}"
 
 
-def write_if_changed(path: Path, content: str) -> None:
+def write_if_changed(path: Path, content: str) -> bool:
     if path.exists() and path.read_text(encoding="utf-8") == content:
-        return
+        return False
     path.write_text(content, encoding="utf-8")
+    return True

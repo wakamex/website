@@ -3,6 +3,7 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 import build_blog as builder
 
@@ -102,7 +103,9 @@ class BlogBuildTests(unittest.TestCase):
                 builder.BLOG_OUTPUT_DIR.mkdir()
                 (builder.BLOG_OUTPUT_DIR / "stale.html").write_text("stale")
 
-                builder.main()
+                with mock.patch("builtins.print") as print_mock:
+                    builder.main()
+                print_mock.assert_called_once_with("checked 1 post(s), wrote 3 file(s)")
 
                 index = (builder.BLOG_OUTPUT_DIR / "index.html").read_text()
                 redirect = (builder.ROOT / "blog.html").read_text()
@@ -125,7 +128,9 @@ class BlogBuildTests(unittest.TestCase):
                 for output in outputs:
                     os.utime(output, ns=(preserved_mtime, preserved_mtime))
 
-                builder.main()
+                with mock.patch("builtins.print") as print_mock:
+                    builder.main()
+                print_mock.assert_called_once_with("checked 1 post(s), wrote 0 file(s)")
 
                 for output in outputs:
                     self.assertEqual(preserved_mtime, output.stat().st_mtime_ns)

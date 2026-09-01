@@ -43,7 +43,7 @@ build_elapsed=$(awk -v start="$build_started_at" -v finish="$build_finished_at" 
 echo "Built in $build_elapsed seconds"
 
 # Top-level files: default set, or whatever the user passed.
-default_files=(index.html autoresearch.html projects.html style.css resume.html status.html blog.html og-image.png meters.js site-nav.js D2CodingLigature-web.woff2 youtube-cli-uploader-demo.cast)
+default_files=(.htaccess index.html autoresearch.html projects.html style.css resume.html status.html blog.html og-image.png meters.js site-nav.js D2CodingLigature-web.woff2 youtube-cli-uploader-demo.cast)
 if $default_deploy; then
     files=("${default_files[@]}")
 else

@@ -17,7 +17,7 @@ class BlogBuildTests(unittest.TestCase):
 
     def test_asciinema_shortcode_adds_player(self):
         date, _, title, body = self.parse('{{ asciinema("/demo.cast") }}')
-        rendered = builder.render_post(date, title, body)
+        rendered = builder.render_post(date, "demo", title, body)
 
         self.assertIn('<div data-asciinema="/demo.cast"></div>', rendered)
         self.assertIn(f"asciinema-player@{builder.ASCIINEMA_PLAYER_VERSION}", rendered)
@@ -25,7 +25,7 @@ class BlogBuildTests(unittest.TestCase):
 
     def test_post_without_asciinema_omits_player_assets(self):
         date, _, title, body = self.parse("Plain post.")
-        rendered = builder.render_post(date, title, body)
+        rendered = builder.render_post(date, "demo", title, body)
 
         self.assertNotIn("asciinema-player@", rendered)
         self.assertNotIn("AsciinemaPlayer.create", rendered)
@@ -34,7 +34,7 @@ class BlogBuildTests(unittest.TestCase):
         date, _, title, body = self.parse(
             '{{ asciinema("/first.cast") }}\n\n{{ asciinema("/second.cast") }}'
         )
-        rendered = builder.render_post(date, title, body)
+        rendered = builder.render_post(date, "demo", title, body)
 
         self.assertIn('data-asciinema="/first.cast"', rendered)
         self.assertIn('data-asciinema="/second.cast"', rendered)
@@ -51,6 +51,15 @@ class BlogBuildTests(unittest.TestCase):
 
         self.assertIn('<a href="#effective_rate">effective rate</a>', body)
         self.assertIn('<h2 id="effective_rate">Effective rate</h2>', body)
+
+    def test_post_has_absolute_canonical_url(self):
+        date, slug, title, body = self.parse("Plain post.")
+        rendered = builder.render_post(date, slug, title, body)
+
+        self.assertIn(
+            '<link rel="canonical" href="https://mihaicosma.com/blog/demo.html">',
+            rendered,
+        )
 
     def test_build_writes_canonical_index_and_legacy_redirect(self):
         original_root = builder.ROOT

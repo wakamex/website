@@ -42,6 +42,7 @@ POST_TEMPLATE = f"""<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{title}} — Mihai Cosma</title>
+    <link rel="canonical" href="https://mihaicosma.com/blog/{{slug}}.html">
     <link rel="stylesheet" href="/style.css">
 {{extra_head}}
 </head>
@@ -148,10 +149,11 @@ def committed_markdown(repo: Path):
         yield name, text
 
 
-def render_post(date_str, title, body):
+def render_post(date_str, slug, title, body):
     has_asciinema = "data-asciinema=" in body
     return POST_TEMPLATE.format(
         title=title,
+        slug=slug,
         date_str=date_str,
         body=body,
         extra_head=ASCIINEMA_HEAD if has_asciinema else "",
@@ -166,7 +168,7 @@ def main():
     posts = []
     for filename, text in committed_markdown(BLOG_REPO):
         date_str, slug, title, body = parse_post_text(filename, text)
-        rendered = render_post(date_str, title, body)
+        rendered = render_post(date_str, slug, title, body)
         output = BLOG_OUTPUT_DIR / f"{slug}.html"
         files_written += write_if_changed(output, rendered)
         expected_outputs.add(output)

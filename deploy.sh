@@ -4,6 +4,23 @@ cd "$(dirname "$0")"
 
 parsync_bin=/code/parsync-local-to-remote/target/release/parsync
 remote_root=mc:/var/www/mihaicosma.com
+shaarli_stamp=.private/shaarli-deploy.hash
+
+force_shaarli=false
+requested_files=()
+for arg in "$@"; do
+    if [ "$arg" = "--force-shaarli" ]; then
+        force_shaarli=true
+    else
+        requested_files+=("$arg")
+    fi
+done
+
+if [ ${#requested_files[@]} -eq 0 ]; then
+    default_deploy=true
+else
+    default_deploy=false
+fi
 
 if [ ! -x "$parsync_bin" ]; then
     echo "Missing executable parsync branch build: $parsync_bin" >&2
@@ -27,10 +44,10 @@ echo "Built in $build_elapsed seconds"
 
 # Top-level files: default set, or whatever the user passed.
 default_files=(index.html autoresearch.html projects.html style.css resume.html status.html blog.html og-image.png meters.js site-nav.js D2CodingLigature-web.woff2 youtube-cli-uploader-demo.cast)
-if [ $# -eq 0 ]; then
+if $default_deploy; then
     files=("${default_files[@]}")
 else
-    files=("$@")
+    files=("${requested_files[@]}")
 fi
 
 deploy_stage=$(mktemp -d)
@@ -58,7 +75,7 @@ for file in "${files[@]}"; do
 done
 
 # Blog HTML: only include when running the default deploy (no args).
-if [ $# -eq 0 ]; then
+if $default_deploy; then
     blog_files=(blog/*.html)
     if [ -e "${blog_files[0]}" ]; then
         mkdir "$deploy_stage/blog"
@@ -82,8 +99,38 @@ echo "Uploads completed in $upload_elapsed seconds"
 cleanup_stage
 trap - EXIT
 
-if [ $# -eq 0 ]; then
-    # Keep Shaarli's generated navigation and header theme in sync.
-    echo "Deploying the Shaarli navigation and theme..."
-    ./deploy_shaarli_theme.sh
+if $default_deploy || $force_shaarli; then
+    shaarli_inputs=(
+        deploy_shaarli_theme.sh
+        shaarli-theme/refined.css
+        shaarli-theme/patch_linklist.py
+        shaarli-theme/build_css_bundle.py
+        shaarli-theme/inline_svg_icons.py
+        shaarli-theme/site_navigation/site_navigation.php
+        shaarli-theme/site_navigation/site_navigation.meta
+        shaarli-theme/site_navigation/navigation.generated.php
+    )
+    for file in "${shaarli_inputs[@]}"; do
+        if [ ! -f "$file" ]; then
+            echo "Shaarli deployment input not found: $file" >&2
+            exit 1
+        fi
+    done
+    shaarli_hash=$(sha256sum -- "${shaarli_inputs[@]}" | sha256sum | awk '{print $1}')
+    deployed_shaarli_hash=
+    if [ -f "$shaarli_stamp" ]; then
+        deployed_shaarli_hash=$(<"$shaarli_stamp")
+    fi
+
+    if ! $force_shaarli && [ "$shaarli_hash" = "$deployed_shaarli_hash" ]; then
+        echo "Shaarli inputs unchanged; skipping theme deployment"
+    else
+        # Keep Shaarli's generated navigation and header theme in sync.
+        echo "Deploying the Shaarli navigation and theme..."
+        ./deploy_shaarli_theme.sh
+        mkdir -p "${shaarli_stamp%/*}"
+        stamp_tmp=$(mktemp "${shaarli_stamp}.XXXXXX")
+        printf '%s\n' "$shaarli_hash" > "$stamp_tmp"
+        mv -- "$stamp_tmp" "$shaarli_stamp"
+    fi
 fi

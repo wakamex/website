@@ -6,6 +6,7 @@ from pathlib import Path
 
 
 MODULE_PATH = Path(__file__).parent / "shaarli-theme" / "build_css_bundle.py"
+REFINED_PATH = MODULE_PATH.with_name("refined.css")
 SPEC = importlib.util.spec_from_file_location("build_css_bundle", MODULE_PATH)
 assert SPEC and SPEC.loader
 bundler = importlib.util.module_from_spec(SPEC)
@@ -30,6 +31,16 @@ def original_includes() -> str:
 
 
 class ShaarliCssBundleTests(unittest.TestCase):
+    def test_refined_theme_overrides_light_markdown_and_native_controls(self):
+        refined = REFINED_PATH.read_text(encoding="utf-8")
+
+        self.assertIn("color-scheme: dark", refined)
+        self.assertIn(".markdown pre,", refined)
+        self.assertIn(".markdown :not(pre) code", refined)
+        self.assertIn(".markdown pre code {", refined)
+        self.assertIn("background: transparent", refined)
+        self.assertIn("box-shadow: none", refined)
+
     def test_bundle_keeps_source_order_and_relative_urls(self):
         stock = (
             '.thumb{background:url(../img/thumb.png)}\n'

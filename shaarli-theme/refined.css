@@ -5,6 +5,7 @@
 }
 
 :root {
+    color-scheme: dark;
     --main-color: #ff9800;
     --background-color: #040506;
     --dark-main-color: #a69987;
@@ -110,18 +111,30 @@ a:focus {
 }
 
 code,
-pre {
+pre,
+.markdown pre,
+.markdown :not(pre) code {
     color: var(--refined-bright);
     background: rgba(255, 255, 255, 0.04);
+    box-shadow: none;
 }
 
-code {
+code,
+.markdown :not(pre) code {
     padding: 0.1em 0.4em;
 }
 
-pre {
+pre,
+.markdown pre {
     padding: 10px 12px;
     overflow-x: auto;
+}
+
+.markdown pre code {
+    padding: 0;
+    color: inherit;
+    background: transparent;
+    box-shadow: none;
 }
 
 /* GENERATED SITE HEADER THEME:START */

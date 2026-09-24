@@ -2,4 +2,8 @@ Redirect permanent /posts/do-llms-have-bliefs.html /blog/do-llms-have-beliefs.ht
 Redirect permanent /blog/do-llms-have-bliefs.html /blog/do-llms-have-beliefs.html
 
 SetEnvIf Request_URI "^/inquisition(?:/|$)" inquisition_revalidate
-Header always set Cache-Control "no-cache" env=inquisition_revalidate
+<FilesMatch ".*">
+    Header onsuccess unset Cache-Control env=inquisition_revalidate
+    Header always unset Cache-Control env=inquisition_revalidate
+    Header always set Cache-Control "no-cache" env=inquisition_revalidate
+</FilesMatch>

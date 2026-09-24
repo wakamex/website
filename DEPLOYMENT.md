@@ -6,7 +6,9 @@ Passing website-relative filenames publishes only those top-level files. `--forc
 
 ## Inquisition prototype contract
 
-The canonical public artifact root is `/code/inquisition/prototype/`. The website repository does not contain a copy. `index.html` is required and becomes the page at `/inquisition/`; every other file and subdirectory keeps its path below that URL.
+The canonical public artifact root is `/code/inquisition/prototype/`. The website repository does not contain a copy. `index.html` or `index.md` is required and becomes the page at `/inquisition/`; every other file and subdirectory keeps its path below that URL.
+
+Markdown files are rendered recursively during staging with the same fenced-code, table, and heading-anchor support as the Blog. `notes.md` becomes `notes.html`, and the raw Markdown is not published. An HTML file and Markdown file cannot produce the same output path.
 
 Every path under `prototype/` is public. Keep drafts, source material, credentials, and internal notes elsewhere. The deployer rejects hidden paths, symlinks, special files, invalid UTF-8 HTML, and incomplete HTML documents.
 

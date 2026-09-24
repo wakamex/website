@@ -114,49 +114,8 @@ fi
 
 # Trusted mapping from the Inquisition workspace to its stable public URL.
 if $default_deploy || $include_inquisition; then
-    python3 - "$inquisition_source" <<'PY'
-import sys
-from pathlib import Path
-
-root = Path(sys.argv[1])
-if root.is_symlink() or not root.is_dir():
-    raise SystemExit(f"Inquisition artifact root must be a regular directory: {root}")
-
-paths = list(root.rglob("*"))
-for path in paths:
-    relative = path.relative_to(root)
-    if any(part.startswith(".") for part in relative.parts):
-        raise SystemExit(f"Inquisition artifact contains a hidden path: {relative}")
-    if path.is_symlink():
-        raise SystemExit(f"Inquisition artifact contains a symlink: {relative}")
-    if not path.is_file() and not path.is_dir():
-        raise SystemExit(f"Inquisition artifact contains a special file: {relative}")
-
-index = root / "index.html"
-if not index.is_file():
-    raise SystemExit("Inquisition artifact requires prototype/index.html")
-
-html_paths = (
-    candidate
-    for candidate in paths
-    if candidate.is_file() and candidate.suffix.lower() == ".html"
-)
-for path in html_paths:
-    relative = path.relative_to(root)
-    try:
-        content = path.read_text(encoding="utf-8")
-    except UnicodeDecodeError as error:
-        raise SystemExit(f"Inquisition HTML is not valid UTF-8 ({relative}): {error}")
-    normalized = content.lstrip("\ufeff \t\r\n").lower()
-    if (
-        not normalized.startswith("<!doctype html")
-        or "<html" not in normalized
-        or "</html>" not in normalized
-    ):
-        raise SystemExit(f"Inquisition artifact is not complete HTML: {relative}")
-PY
     inquisition_stage=$(mktemp -d)
-    cp -a -- "$inquisition_source/." "$inquisition_stage/"
+    /usr/bin/python3 build_inquisition.py "$inquisition_source" "$inquisition_stage"
 fi
 
 if [ ${#staged_files[@]} -gt 0 ]; then

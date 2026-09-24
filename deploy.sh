@@ -8,9 +8,10 @@ remote_webroot=/var/www/mihaicosma.com
 remote_root=$remote_host:$remote_webroot
 shaarli_stamp=.private/shaarli-deploy.hash
 inquisition_source=/code/inquisition/prototype
-inquisition_remote_stage=/var/www/.inquisition-stage
+inquisition_remote_work=$remote_webroot/.inquisition-deploy
+inquisition_remote_stage=$inquisition_remote_work/stage
 inquisition_remote_target=$remote_webroot/inquisition
-inquisition_remote_backup=/var/www/.inquisition-previous
+inquisition_remote_backup=$inquisition_remote_work/previous
 
 force_shaarli=false
 include_inquisition=false
@@ -174,24 +175,31 @@ if [ -n "$inquisition_stage" ]; then
     echo "Uploading $inquisition_file_count Inquisition prototype file(s)..."
     ssh "$remote_host" "
         set -e
+        test ! -L '$inquisition_remote_work'
         test ! -L '$inquisition_remote_stage'
         test ! -L '$inquisition_remote_backup'
+        install -d -m 700 '$inquisition_remote_work'
         rm -rf -- '$inquisition_remote_stage' '$inquisition_remote_backup'
         mkdir -- '$inquisition_remote_stage'
     "
     if ! "$parsync_bin" -rP --verify-existing "$inquisition_stage/*" \
         "$remote_host:$inquisition_remote_stage"; then
-        ssh "$remote_host" "rm -rf -- '$inquisition_remote_stage'" || true
+        ssh "$remote_host" "
+            rm -rf -- '$inquisition_remote_stage'
+            rmdir -- '$inquisition_remote_work' 2>/dev/null || true
+        " || true
         exit 1
     fi
     ssh "$remote_host" "
         set -e
         test ! -L '$inquisition_remote_target'
+        chmod 2755 '$inquisition_remote_stage'
         if [ -e '$inquisition_remote_target' ]; then
             mv -- '$inquisition_remote_target' '$inquisition_remote_backup'
         fi
         if mv -- '$inquisition_remote_stage' '$inquisition_remote_target'; then
             rm -rf -- '$inquisition_remote_backup'
+            rmdir -- '$inquisition_remote_work'
         else
             if [ -e '$inquisition_remote_backup' ]; then
                 mv -- '$inquisition_remote_backup' '$inquisition_remote_target'

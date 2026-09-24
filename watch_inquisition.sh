@@ -5,6 +5,7 @@ cd "$(dirname "$0")"
 
 source_dir=/code/inquisition/prototype
 idle_seconds=${1:-5}
+temporary_file_pattern='(^|/)[^/]*\.tmp\.[^/]*$'
 
 if ! [[ "$idle_seconds" =~ ^[1-9][0-9]*$ ]]; then
     echo "Usage: $0 [positive-idle-seconds]" >&2
@@ -28,11 +29,12 @@ publish
 echo "Watching $source_dir; publishing after $idle_seconds quiet second(s). Press Ctrl-C to stop."
 
 while true; do
-    if ! inotifywait -q -r -e close_write,create,delete,move "$source_dir"; then
+    if ! inotifywait -q -r --exclude "$temporary_file_pattern" \
+        -e close_write,create,delete,move "$source_dir"; then
         sleep 1
         continue
     fi
-    while inotifywait -q -r -t "$idle_seconds" \
+    while inotifywait -q -r -t "$idle_seconds" --exclude "$temporary_file_pattern" \
         -e close_write,create,delete,move "$source_dir"; do
         :
     done

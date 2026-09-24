@@ -10,4 +10,4 @@ Everything under `prototype/` is public. Keep drafts, notes, source material, cr
 
 Every `.html` file must be a complete UTF-8 HTML document with a doctype, opening `<html>` element, and closing `</html>` element. Page titles, chapter numbers, and visible labels come directly from the HTML; deployment does not infer or rewrite them from filenames.
 
-The public directory is an exact mirror. Delete obsolete public files from `prototype/` when they should disappear from the site. A watcher may publish after five quiet seconds, so leave the directory in a coherent, valid state when a change batch is complete. Failed validation leaves the previous live version untouched.
+The public directory is an exact mirror. Delete obsolete public files from `prototype/` when they should disappear from the site. A watcher may publish after five quiet seconds, so leave the directory in a coherent, valid state when a change batch is complete. Files matching `*.tmp.*` are ignored until they are moved onto a final filename. Failed validation leaves the previous live version untouched.

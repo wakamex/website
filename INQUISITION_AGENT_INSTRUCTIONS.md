@@ -4,7 +4,7 @@ Treat `/code/inquisition/prototype/` as the complete public artifact for browser
 
 `prototype/index.html` or `prototype/index.md` is required and is the entry page. Every other file and subdirectory keeps the same relative public path, so use relative links such as `styles.css`, `scripts/game.js`, and `images/map.webp`.
 
-Markdown files are rendered recursively during deployment. `notes.md` becomes `notes.html`, and the raw `.md` file is not published. Markdown supports fenced code blocks, tables, and linkable heading IDs like the site Blog. Start every Markdown file with `# Title`, link to rendered pages with their `.html` paths, and do not create both `name.md` and `name.html` because they target the same public URL.
+Markdown files are rendered recursively during deployment. `notes.md` becomes `notes.html`, and the raw `.md` file is not published. Markdown supports fenced code blocks, tables, and linkable heading IDs like the site Blog. Rendered Markdown uses the site's typography without its navigation or meters gadget. Start every Markdown file with `# Title`, link to rendered pages with their `.html` paths, and do not create both `name.md` and `name.html` because they target the same public URL.
 
 Everything under `prototype/` is public. Keep drafts, notes, source material, credentials, logs, and temporary files elsewhere. Do not create hidden paths, symlinks, sockets, named pipes, or other special files in the public artifact tree.
 

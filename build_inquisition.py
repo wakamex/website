@@ -12,29 +12,20 @@ from urllib.parse import quote
 
 import markdown
 
-from site_shared import render_site_header
-
-
-SITE_HEADER = render_site_header(None)
-METERS = '    <a href="/status.html" class="meters-link"><div class="meters" id="meters"></div></a>'
-PAGE_TEMPLATE = f"""<!DOCTYPE html>
+PAGE_TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{title}} — Mihai Cosma</title>
-    <link rel="canonical" href="{{canonical_url}}">
+    <title>{title} — Mihai Cosma</title>
+    <link rel="canonical" href="{canonical_url}">
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-{SITE_HEADER}
-{METERS}
     <article class="post">
-        <h1>{{title}}</h1>
-{{body}}
+        <h1>{title}</h1>
+{body}
     </article>
-    <script src="/meters.js"></script>
-    <script src="/site-nav.js"></script>
 </body>
 </html>
 """

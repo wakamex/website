@@ -20,9 +20,48 @@ publish() {
     echo "[$(date +%H:%M:%S)] Publishing Inquisition prototype..."
     if ./deploy.sh --inquisition; then
         echo "[$(date +%H:%M:%S)] Inquisition prototype is current"
+        return 0
     else
         echo "[$(date +%H:%M:%S)] Publish failed; watching for the next change" >&2
+        return 1
     fi
+}
+
+source_version() {
+    find "$source_dir" -type f ! -name '*.tmp.*' -print0 \
+        | sort -z \
+        | xargs -0 -r sha256sum --zero \
+        | sha256sum \
+        | cut -d ' ' -f 1
+}
+
+wait_for_source_quiet() {
+    previous_version=$(source_version)
+    while true; do
+        sleep "$idle_seconds"
+        current_version=$(source_version)
+        if [ "$current_version" = "$previous_version" ]; then
+            return
+        fi
+        previous_version=$current_version
+    done
+}
+
+deployed_version=
+publish_current_version() {
+    while true; do
+        candidate_version=$(source_version)
+        if ! publish; then
+            return
+        fi
+        current_version=$(source_version)
+        if [ "$current_version" = "$candidate_version" ]; then
+            deployed_version=$current_version
+            return
+        fi
+        echo "[$(date +%H:%M:%S)] Source changed during publish; waiting for a quiet tree before catching up"
+        wait_for_source_quiet
+    done
 }
 
 watch_events() {
@@ -52,13 +91,16 @@ while true; do
         fi
 
         echo "Watching $source_dir; publishing after $idle_seconds quiet second(s). Press Ctrl-C to stop."
-        publish
+        publish_current_version
 
         while IFS= read -r event; do
             while IFS= read -r -t "$idle_seconds" event; do
                 :
             done
-            publish
+            current_version=$(source_version)
+            if [ "$current_version" != "$deployed_version" ]; then
+                publish_current_version
+            fi
         done
     }
     echo "Inquisition file monitor stopped; restarting" >&2

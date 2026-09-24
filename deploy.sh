@@ -5,18 +5,31 @@ cd "$(dirname "$0")"
 parsync_bin=/code/parsync-local-to-remote/target/release/parsync
 remote_root=mc:/var/www/mihaicosma.com
 shaarli_stamp=.private/shaarli-deploy.hash
+inquisition_source=/code/inquisition/prototype/chapter3.html
 
 force_shaarli=false
+include_inquisition=false
 requested_files=()
 for arg in "$@"; do
-    if [ "$arg" = "--force-shaarli" ]; then
-        force_shaarli=true
-    else
-        requested_files+=("$arg")
-    fi
+    case "$arg" in
+        --force-shaarli)
+            force_shaarli=true
+            ;;
+        --inquisition)
+            include_inquisition=true
+            ;;
+        *)
+            requested_files+=("$arg")
+            ;;
+    esac
 done
 
-if [ ${#requested_files[@]} -eq 0 ]; then
+inquisition_only=false
+if $include_inquisition && [ ${#requested_files[@]} -eq 0 ] && ! $force_shaarli; then
+    inquisition_only=true
+fi
+
+if [ ${#requested_files[@]} -eq 0 ] && ! $include_inquisition; then
     default_deploy=true
 else
     default_deploy=false
@@ -27,20 +40,22 @@ if [ ! -x "$parsync_bin" ]; then
     exit 1
 fi
 
-build_started_at=$(date +%s.%N)
+if ! $inquisition_only; then
+    build_started_at=$(date +%s.%N)
 
-echo "Building shared navigation and themes..."
-python3 build_shared_site.py
+    echo "Building shared navigation and themes..."
+    python3 build_shared_site.py
 
-echo "Building blog..."
-python3 build_blog.py
+    echo "Building blog..."
+    python3 build_blog.py
 
-echo "Building Autoresearch pages..."
-python3 build_autoresearch.py --require-fresh
+    echo "Building Autoresearch pages..."
+    python3 build_autoresearch.py --require-fresh
 
-build_finished_at=$(date +%s.%N)
-build_elapsed=$(awk -v start="$build_started_at" -v finish="$build_finished_at" 'BEGIN { printf "%.2f", finish - start }')
-echo "Built in $build_elapsed seconds"
+    build_finished_at=$(date +%s.%N)
+    build_elapsed=$(awk -v start="$build_started_at" -v finish="$build_finished_at" 'BEGIN { printf "%.2f", finish - start }')
+    echo "Built in $build_elapsed seconds"
+fi
 
 # Top-level files: default set, or whatever the user passed.
 default_files=(.htaccess index.html autoresearch.html projects.html style.css resume.html status.html blog.html og-image.png meters.js site-nav.js D2CodingLigature-web.woff2 youtube-cli-uploader-demo.cast)
@@ -59,6 +74,9 @@ cleanup_stage() {
     done
     if [ -d "$deploy_stage/blog" ]; then
         rmdir "$deploy_stage/blog"
+    fi
+    if [ -d "$deploy_stage/inquisition" ]; then
+        rmdir "$deploy_stage/inquisition"
     fi
     rmdir "$deploy_stage"
 }
@@ -85,6 +103,35 @@ if $default_deploy; then
             staged_files+=("$staged_file")
         done
     fi
+fi
+
+# Trusted mapping from the Inquisition workspace to its stable public URL.
+if $default_deploy || $include_inquisition; then
+    if [ ! -f "$inquisition_source" ] || [ -L "$inquisition_source" ]; then
+        echo "Inquisition artifact must be a regular, non-symlink file: $inquisition_source" >&2
+        exit 1
+    fi
+    python3 - "$inquisition_source" <<'PY'
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+try:
+    content = path.read_text(encoding="utf-8")
+except UnicodeDecodeError as error:
+    raise SystemExit(f"Inquisition artifact is not valid UTF-8: {error}")
+normalized = content.lstrip("\ufeff \t\r\n").lower()
+if (
+    not normalized.startswith("<!doctype html")
+    or "<html" not in normalized
+    or "</html>" not in normalized
+):
+    raise SystemExit("Inquisition artifact must be a complete HTML document")
+PY
+    mkdir "$deploy_stage/inquisition"
+    staged_file="$deploy_stage/inquisition/index.html"
+    cp -p -- "$inquisition_source" "$staged_file"
+    staged_files+=("$staged_file")
 fi
 
 upload_started_at=$(date +%s.%N)

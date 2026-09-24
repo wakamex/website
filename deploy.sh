@@ -3,9 +3,14 @@ set -e
 cd "$(dirname "$0")"
 
 parsync_bin=/code/parsync-local-to-remote/target/release/parsync
-remote_root=mc:/var/www/mihaicosma.com
+remote_host=mc
+remote_webroot=/var/www/mihaicosma.com
+remote_root=$remote_host:$remote_webroot
 shaarli_stamp=.private/shaarli-deploy.hash
-inquisition_source=/code/inquisition/prototype/chapter3.html
+inquisition_source=/code/inquisition/prototype
+inquisition_remote_stage=/var/www/.inquisition-stage
+inquisition_remote_target=$remote_webroot/inquisition
+inquisition_remote_backup=/var/www/.inquisition-previous
 
 force_shaarli=false
 include_inquisition=false
@@ -66,6 +71,7 @@ else
 fi
 
 deploy_stage=$(mktemp -d)
+inquisition_stage=
 staged_files=()
 cleanup_stage() {
     for staged_file in "${staged_files[@]}"; do
@@ -75,10 +81,10 @@ cleanup_stage() {
     if [ -d "$deploy_stage/blog" ]; then
         rmdir "$deploy_stage/blog"
     fi
-    if [ -d "$deploy_stage/inquisition" ]; then
-        rmdir "$deploy_stage/inquisition"
-    fi
     rmdir "$deploy_stage"
+    if [ -n "$inquisition_stage" ] && [ -d "$inquisition_stage" ]; then
+        rm -rf -- "$inquisition_stage"
+    fi
 }
 trap cleanup_stage EXIT
 
@@ -107,41 +113,94 @@ fi
 
 # Trusted mapping from the Inquisition workspace to its stable public URL.
 if $default_deploy || $include_inquisition; then
-    if [ ! -f "$inquisition_source" ] || [ -L "$inquisition_source" ]; then
-        echo "Inquisition artifact must be a regular, non-symlink file: $inquisition_source" >&2
-        exit 1
-    fi
     python3 - "$inquisition_source" <<'PY'
 import sys
 from pathlib import Path
 
-path = Path(sys.argv[1])
-try:
-    content = path.read_text(encoding="utf-8")
-except UnicodeDecodeError as error:
-    raise SystemExit(f"Inquisition artifact is not valid UTF-8: {error}")
-normalized = content.lstrip("\ufeff \t\r\n").lower()
-if (
-    not normalized.startswith("<!doctype html")
-    or "<html" not in normalized
-    or "</html>" not in normalized
-):
-    raise SystemExit("Inquisition artifact must be a complete HTML document")
+root = Path(sys.argv[1])
+if root.is_symlink() or not root.is_dir():
+    raise SystemExit(f"Inquisition artifact root must be a regular directory: {root}")
+
+paths = list(root.rglob("*"))
+for path in paths:
+    relative = path.relative_to(root)
+    if any(part.startswith(".") for part in relative.parts):
+        raise SystemExit(f"Inquisition artifact contains a hidden path: {relative}")
+    if path.is_symlink():
+        raise SystemExit(f"Inquisition artifact contains a symlink: {relative}")
+    if not path.is_file() and not path.is_dir():
+        raise SystemExit(f"Inquisition artifact contains a special file: {relative}")
+
+index = root / "index.html"
+if not index.is_file():
+    raise SystemExit("Inquisition artifact requires prototype/index.html")
+
+html_paths = (
+    candidate
+    for candidate in paths
+    if candidate.is_file() and candidate.suffix.lower() == ".html"
+)
+for path in html_paths:
+    relative = path.relative_to(root)
+    try:
+        content = path.read_text(encoding="utf-8")
+    except UnicodeDecodeError as error:
+        raise SystemExit(f"Inquisition HTML is not valid UTF-8 ({relative}): {error}")
+    normalized = content.lstrip("\ufeff \t\r\n").lower()
+    if (
+        not normalized.startswith("<!doctype html")
+        or "<html" not in normalized
+        or "</html>" not in normalized
+    ):
+        raise SystemExit(f"Inquisition artifact is not complete HTML: {relative}")
 PY
-    mkdir "$deploy_stage/inquisition"
-    staged_file="$deploy_stage/inquisition/index.html"
-    cp -p -- "$inquisition_source" "$staged_file"
-    staged_files+=("$staged_file")
+    inquisition_stage=$(mktemp -d)
+    cp -a -- "$inquisition_source/." "$inquisition_stage/"
 fi
 
-upload_started_at=$(date +%s.%N)
+if [ ${#staged_files[@]} -gt 0 ]; then
+    upload_started_at=$(date +%s.%N)
 
-echo "Uploading ${#staged_files[@]} site files..."
-"$parsync_bin" -rP --verify-existing "$deploy_stage/*" "$remote_root"
+    echo "Uploading ${#staged_files[@]} site files..."
+    "$parsync_bin" -rP --verify-existing "$deploy_stage/*" "$remote_root"
 
-upload_finished_at=$(date +%s.%N)
-upload_elapsed=$(awk -v start="$upload_started_at" -v finish="$upload_finished_at" 'BEGIN { printf "%.2f", finish - start }')
-echo "Uploads completed in $upload_elapsed seconds"
+    upload_finished_at=$(date +%s.%N)
+    upload_elapsed=$(awk -v start="$upload_started_at" -v finish="$upload_finished_at" 'BEGIN { printf "%.2f", finish - start }')
+    echo "Uploads completed in $upload_elapsed seconds"
+fi
+
+if [ -n "$inquisition_stage" ]; then
+    inquisition_file_count=$(find "$inquisition_stage" -type f | wc -l)
+    echo "Uploading $inquisition_file_count Inquisition prototype file(s)..."
+    ssh "$remote_host" "
+        set -e
+        test ! -L '$inquisition_remote_stage'
+        test ! -L '$inquisition_remote_backup'
+        rm -rf -- '$inquisition_remote_stage' '$inquisition_remote_backup'
+        mkdir -- '$inquisition_remote_stage'
+    "
+    if ! "$parsync_bin" -rP --verify-existing "$inquisition_stage/*" \
+        "$remote_host:$inquisition_remote_stage"; then
+        ssh "$remote_host" "rm -rf -- '$inquisition_remote_stage'" || true
+        exit 1
+    fi
+    ssh "$remote_host" "
+        set -e
+        test ! -L '$inquisition_remote_target'
+        if [ -e '$inquisition_remote_target' ]; then
+            mv -- '$inquisition_remote_target' '$inquisition_remote_backup'
+        fi
+        if mv -- '$inquisition_remote_stage' '$inquisition_remote_target'; then
+            rm -rf -- '$inquisition_remote_backup'
+        else
+            if [ -e '$inquisition_remote_backup' ]; then
+                mv -- '$inquisition_remote_backup' '$inquisition_remote_target'
+            fi
+            exit 1
+        fi
+    "
+    echo "Inquisition prototype deployed"
+fi
 
 cleanup_stage
 trap - EXIT

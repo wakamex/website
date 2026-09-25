@@ -5,6 +5,7 @@ cd "$(dirname "$0")"
 
 source_dir=/code/inquisition/prototype
 idle_seconds=${1:-5}
+retry_seconds=30
 temporary_file_pattern='(^|/)[^/]*\.tmp\.[^/]*$'
 
 if ! [[ "$idle_seconds" =~ ^[1-9][0-9]*$ ]]; then
@@ -52,7 +53,9 @@ publish_current_version() {
     while true; do
         candidate_version=$(source_version)
         if ! publish; then
-            return
+            echo "[$(date +%H:%M:%S)] Retrying publish in $retry_seconds seconds"
+            sleep "$retry_seconds"
+            continue
         fi
         current_version=$(source_version)
         if [ "$current_version" = "$candidate_version" ]; then

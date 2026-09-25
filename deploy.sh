@@ -3,6 +3,7 @@ set -e
 cd "$(dirname "$0")"
 
 parsync_bin=/code/parsync-local-to-remote/target/release/parsync
+parsync_jobs=8
 remote_host=mc
 remote_webroot=/var/www/mihaicosma.com
 remote_root=$remote_host:$remote_webroot
@@ -122,7 +123,8 @@ if [ ${#staged_files[@]} -gt 0 ]; then
     upload_started_at=$(date +%s.%N)
 
     echo "Uploading ${#staged_files[@]} site files..."
-    "$parsync_bin" -rP --verify-existing "$deploy_stage/*" "$remote_root"
+    "$parsync_bin" -rP --jobs "$parsync_jobs" --verify-existing \
+        "$deploy_stage/*" "$remote_root"
 
     upload_finished_at=$(date +%s.%N)
     upload_elapsed=$(awk -v start="$upload_started_at" -v finish="$upload_finished_at" 'BEGIN { printf "%.2f", finish - start }')
@@ -141,7 +143,8 @@ if [ -n "$inquisition_stage" ]; then
         rm -rf -- '$inquisition_remote_stage' '$inquisition_remote_backup'
         mkdir -- '$inquisition_remote_stage'
     "
-    if ! "$parsync_bin" -rP --verify-existing "$inquisition_stage/*" \
+    if ! "$parsync_bin" -rP --jobs "$parsync_jobs" --verify-existing \
+        "$inquisition_stage/*" \
         "$remote_host:$inquisition_remote_stage"; then
         ssh "$remote_host" "
             rm -rf -- '$inquisition_remote_stage'

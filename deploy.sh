@@ -126,6 +126,9 @@ if $default_deploy; then
     staged_file="$deploy_stage/sycophancy/index.html"
     cp -p -- "$sycophancy_source" "$staged_file"
     staged_files+=("$staged_file")
+    staged_file="$deploy_stage/sycophancy/og.png"
+    cp -p -- "${sycophancy_source%/*}/og.png" "$staged_file"
+    staged_files+=("$staged_file")
 fi
 
 # Trusted mapping from the Inquisition workspace to its stable public URL.

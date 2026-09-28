@@ -2,6 +2,8 @@
 
 `./deploy.sh` rebuilds and publishes the normal static site, Blog, Autoresearch, declared external artifacts, and changed Shaarli inputs.
 
+A default deploy also publishes the Sycophancy Bench v2 page from `/code/sycophant-public/v2/index.html` at `https://mihaicosma.com/sycophancy/`.
+
 Passing website-relative filenames publishes only those top-level files. `--force-shaarli` also runs the Shaarli deployment regardless of its input hash.
 
 ## Inquisition prototype contract

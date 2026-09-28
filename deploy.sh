@@ -9,6 +9,7 @@ remote_webroot=/var/www/mihaicosma.com
 remote_root=$remote_host:$remote_webroot
 shaarli_stamp=.private/shaarli-deploy.hash
 inquisition_source=/code/inquisition/prototype
+sycophancy_source=/code/sycophant-public/v2/index.html
 inquisition_remote_work=$remote_webroot/.inquisition-deploy
 inquisition_remote_stage=$inquisition_remote_work/stage
 inquisition_remote_target=$remote_webroot/inquisition
@@ -80,9 +81,11 @@ cleanup_stage() {
         [ -e "$staged_file" ] || continue
         unlink "$staged_file"
     done
-    if [ -d "$deploy_stage/blog" ]; then
-        rmdir "$deploy_stage/blog"
-    fi
+    for staged_dir in blog sycophancy; do
+        if [ -d "$deploy_stage/$staged_dir" ]; then
+            rmdir "$deploy_stage/$staged_dir"
+        fi
+    done
     rmdir "$deploy_stage"
     if [ -n "$inquisition_stage" ] && [ -d "$inquisition_stage" ]; then
         rm -rf -- "$inquisition_stage"
@@ -111,6 +114,18 @@ if $default_deploy; then
             staged_files+=("$staged_file")
         done
     fi
+fi
+
+# Sycophancy Bench v2 results page, a self-contained file from the public sycophant repository.
+if $default_deploy; then
+    if [ ! -f "$sycophancy_source" ]; then
+        echo "Sycophancy page not found: $sycophancy_source" >&2
+        exit 1
+    fi
+    mkdir "$deploy_stage/sycophancy"
+    staged_file="$deploy_stage/sycophancy/index.html"
+    cp -p -- "$sycophancy_source" "$staged_file"
+    staged_files+=("$staged_file")
 fi
 
 # Trusted mapping from the Inquisition workspace to its stable public URL.

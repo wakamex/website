@@ -1,6 +1,6 @@
 @font-face {
-    font-family: "D2Coding";
-    src: url("/D2CodingLigature-web.woff2") format("woff2");
+    font-family: "Clanker Mono";
+    src: url("/ClankerMono-web.woff2") format("woff2");
     font-display: swap;
 }
 
@@ -77,7 +77,7 @@ input,
 button,
 select,
 textarea {
-    font-family: "D2Coding", monospace;
+    font-family: "Clanker Mono", monospace;
 }
 
 body {
@@ -796,7 +796,7 @@ input[type="submit"]:hover,
 .picwall-pictureframe:hover span.info {
     background: rgba(4, 5, 6, 0.92);
     color: var(--refined-link);
-    font-family: "D2Coding", monospace;
+    font-family: "Clanker Mono", monospace;
     font-weight: normal;
 }
 

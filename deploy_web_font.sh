@@ -5,7 +5,7 @@ cd "$(dirname "$0")"
 
 remote="mc-new"
 zone="us-central1-a"
-font="D2CodingLigature-web.woff2"
+font="ClankerMono-web.woff2"
 config="apache-font-preload.conf"
 
 gcloud compute scp "$font" "$config" "$remote:~" --zone="$zone" --quiet

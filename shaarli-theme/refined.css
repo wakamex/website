@@ -114,6 +114,7 @@ code,
 pre,
 .markdown pre,
 .markdown :not(pre) code {
+    font-family: inherit;
     color: var(--refined-bright);
     background: rgba(255, 255, 255, 0.04);
     box-shadow: none;

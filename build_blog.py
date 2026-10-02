@@ -166,7 +166,12 @@ def main():
     expected_outputs = set()
     files_written = 0
     posts = []
+    skipped = []
     for filename, text in committed_markdown(BLOG_REPO):
+        # Posts are top-level YYYY-MM-DD-slug.md files; other Markdown, such as AGENTS.md, is repository documentation.
+        if not FILENAME_RE.match(filename):
+            skipped.append(filename)
+            continue
         date_str, slug, title, body = parse_post_text(filename, text)
         rendered = render_post(date_str, slug, title, body)
         output = BLOG_OUTPUT_DIR / f"{slug}.html"
@@ -186,7 +191,10 @@ def main():
         if path not in expected_outputs:
             path.unlink()
     files_written += write_if_changed(ROOT / "blog.html", LEGACY_REDIRECT)
-    print(f"checked {len(posts)} post(s), wrote {files_written} file(s)")
+    summary = f"checked {len(posts)} post(s), wrote {files_written} file(s)"
+    if skipped:
+        summary += f"; skipped non-post Markdown: {', '.join(skipped)}"
+    print(summary)
 
 
 if __name__ == "__main__":

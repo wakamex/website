@@ -91,8 +91,9 @@ class BlogBuildTests(unittest.TestCase):
                 )
                 source = builder.BLOG_REPO / "2026-08-21-demo.md"
                 source.write_text("# Committed title\n")
+                (builder.BLOG_REPO / "AGENTS.md").write_text("Repository notes\n")
                 subprocess.run(
-                    ["git", "-C", str(builder.BLOG_REPO), "add", source.name],
+                    ["git", "-C", str(builder.BLOG_REPO), "add", source.name, "AGENTS.md"],
                     check=True,
                 )
                 subprocess.run(
@@ -114,7 +115,9 @@ class BlogBuildTests(unittest.TestCase):
 
                 with mock.patch("builtins.print") as print_mock:
                     builder.main()
-                print_mock.assert_called_once_with("checked 1 post(s), wrote 3 file(s)")
+                print_mock.assert_called_once_with(
+                    "checked 1 post(s), wrote 3 file(s); skipped non-post Markdown: AGENTS.md"
+                )
 
                 index = (builder.BLOG_OUTPUT_DIR / "index.html").read_text()
                 redirect = (builder.ROOT / "blog.html").read_text()
@@ -139,7 +142,9 @@ class BlogBuildTests(unittest.TestCase):
 
                 with mock.patch("builtins.print") as print_mock:
                     builder.main()
-                print_mock.assert_called_once_with("checked 1 post(s), wrote 0 file(s)")
+                print_mock.assert_called_once_with(
+                    "checked 1 post(s), wrote 0 file(s); skipped non-post Markdown: AGENTS.md"
+                )
 
                 for output in outputs:
                     self.assertEqual(preserved_mtime, output.stat().st_mtime_ns)

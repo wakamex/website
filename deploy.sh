@@ -73,22 +73,8 @@ else
 fi
 
 deploy_stage=$(mktemp -d)
-inquisition_stage=
-staged_files=()
 cleanup_stage() {
-    for staged_file in "${staged_files[@]}"; do
-        [ -e "$staged_file" ] || continue
-        unlink "$staged_file"
-    done
-    for staged_dir in blog sycophancy; do
-        if [ -d "$deploy_stage/$staged_dir" ]; then
-            rmdir "$deploy_stage/$staged_dir"
-        fi
-    done
-    rmdir "$deploy_stage"
-    if [ -n "$inquisition_stage" ] && [ -d "$inquisition_stage" ]; then
-        rm -rf -- "$inquisition_stage"
-    fi
+    rm -rf -- "$deploy_stage"
 }
 trap cleanup_stage EXIT
 
@@ -97,9 +83,7 @@ for file in "${files[@]}"; do
         echo "Top-level deployment file not found: $file" >&2
         exit 1
     fi
-    staged_file="$deploy_stage/${file##*/}"
-    cp -p -- "$file" "$staged_file"
-    staged_files+=("$staged_file")
+    cp -p -- "$file" "$deploy_stage/${file##*/}"
 done
 
 # Blog HTML: only include when running the default deploy (no args).
@@ -107,11 +91,7 @@ if $default_deploy; then
     blog_files=(blog/*.html)
     if [ -e "${blog_files[0]}" ]; then
         mkdir "$deploy_stage/blog"
-        for file in "${blog_files[@]}"; do
-            staged_file="$deploy_stage/blog/${file##*/}"
-            cp -p -- "$file" "$staged_file"
-            staged_files+=("$staged_file")
-        done
+        cp -p -- "${blog_files[@]}" "$deploy_stage/blog/"
     fi
 fi
 
@@ -122,51 +102,33 @@ if $default_deploy; then
         exit 1
     fi
     mkdir "$deploy_stage/sycophancy"
-    staged_file="$deploy_stage/sycophancy/index.html"
-    cp -p -- "$sycophancy_source" "$staged_file"
-    staged_files+=("$staged_file")
-    staged_file="$deploy_stage/sycophancy/og.png"
-    cp -p -- "${sycophancy_source%/*}/og.png" "$staged_file"
-    staged_files+=("$staged_file")
+    cp -p -- "$sycophancy_source" "${sycophancy_source%/*}/og.png" "$deploy_stage/sycophancy/"
 fi
 
 # Trusted mapping from the Inquisition workspace to its stable public URL.
 if $default_deploy || $include_inquisition; then
-    inquisition_stage=$(mktemp -d)
-    /usr/bin/python3 build_inquisition.py "$inquisition_source" "$inquisition_stage"
-fi
-
-if [ ${#staged_files[@]} -gt 0 ]; then
-    upload_started_at=$(date +%s.%N)
-
-    echo "Uploading ${#staged_files[@]} site files..."
-    "$parsync_bin" -rP --jobs "$parsync_jobs" --verify-existing \
-        "$deploy_stage/*" "$remote_root"
-
-    upload_finished_at=$(date +%s.%N)
-    upload_elapsed=$(awk -v start="$upload_started_at" -v finish="$upload_finished_at" 'BEGIN { printf "%.2f", finish - start }')
-    echo "Uploads completed in $upload_elapsed seconds"
-fi
-
-if [ -n "$inquisition_stage" ]; then
-    inquisition_file_count=$(find "$inquisition_stage" -type f | wc -l)
-    echo "Syncing $inquisition_file_count Inquisition prototype file(s)..."
-    ssh "$remote_host" "
-        set -e
-        test ! -L '$inquisition_remote_target'
-        mkdir -p -- '$inquisition_remote_target'
-        chmod 2755 '$inquisition_remote_target'
-    "
+    /usr/bin/python3 build_inquisition.py "$inquisition_source" "$deploy_stage/inquisition"
     # parsync never deletes, so first remove live entries that are absent locally or have changed type.
-    (cd "$inquisition_stage" && find . -mindepth 1 -printf '%y %p\0') | ssh "$remote_host" "bash -c '
+    (cd "$deploy_stage/inquisition" && find . -mindepth 1 -printf '%y %p\0') | ssh "$remote_host" "bash -c '
         set -eo pipefail
+        test ! -L $inquisition_remote_target
+        [ -d $inquisition_remote_target ] || exit 0
         cd $inquisition_remote_target
         comm -z -13 <(sort -z) <(find . -mindepth 1 -printf \"%y %p\\0\" | sort -z) \
             | cut -z -d \" \" -f 2- | xargs -0 -r rm -rf --
     '"
-    "$parsync_bin" -rP --jobs "$parsync_jobs" --verify-existing \
-        "$inquisition_stage/*" "$remote_host:$inquisition_remote_target"
-    echo "Inquisition prototype deployed"
+fi
+
+staged_count=$(find "$deploy_stage" -type f | wc -l)
+if [ "$staged_count" -gt 0 ]; then
+    upload_started_at=$(date +%s.%N)
+
+    echo "Syncing $staged_count site file(s)..."
+    "$parsync_bin" -rP --jobs "$parsync_jobs" "$deploy_stage/*" "$remote_root"
+
+    upload_finished_at=$(date +%s.%N)
+    upload_elapsed=$(awk -v start="$upload_started_at" -v finish="$upload_finished_at" 'BEGIN { printf "%.2f", finish - start }')
+    echo "Sync completed in $upload_elapsed seconds"
 fi
 
 cleanup_stage

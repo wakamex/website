@@ -116,6 +116,8 @@ def build(source: Path, destination: Path) -> int:
             destination_path.write_text(
                 render_markdown(source_path, relative), encoding="utf-8"
             )
+            # Match the source mtime so an unchanged page is skipped by the size-and-mtime sync.
+            shutil.copystat(source_path, destination_path)
         else:
             if source_path.suffix.lower() == ".html":
                 validate_complete_html(source_path, relative)

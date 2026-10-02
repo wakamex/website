@@ -468,7 +468,7 @@ a:hover { border-bottom-color: #e8dcc0; }
 .post [data-asciinema] { margin-bottom: 12px; }
 .post table { border-collapse: collapse; margin-bottom: 12px; }
 .post th, .post td { border: 1px solid #3d3428; padding: 4px 10px; text-align: left; }
-.post th { color: #e0e0e0; background: rgba(255, 255, 255, 0.03); }
+.post th { color: #e0e0e0; background: rgba(255, 255, 255, 0.03); font-weight: normal; }
 
 /* Autoresearch */
 .featured-research { margin-top: 4px; }

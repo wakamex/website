@@ -228,3 +228,20 @@ if $default_deploy || $force_shaarli; then
         mv -- "$stamp_tmp" "$shaarli_stamp"
     fi
 fi
+
+if $default_deploy; then
+    # Name top-level files that a default deploy skips, so new pages are not silently left off the list.
+    skipped_files=()
+    while IFS= read -r file; do
+        case " ${default_files[*]} " in
+            *" $file "*) continue ;;
+        esac
+        case "$file" in
+            */* | .gitignore | *.py | *.sh | *.md | *.conf) continue ;;
+        esac
+        skipped_files+=("$file")
+    done < <(git ls-files --cached --others --exclude-standard | sort -u)
+    if [ ${#skipped_files[@]} -gt 0 ]; then
+        echo "Not deployed (not in default_files): ${skipped_files[*]}"
+    fi
+fi

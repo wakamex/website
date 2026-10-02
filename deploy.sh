@@ -67,6 +67,8 @@ fi
 
 # Top-level files: default set, or whatever the user passed.
 default_files=(.htaccess index.html autoresearch.html projects.html style.css resume.html status.html blog.html og-image.png meters.js site-nav.js ClankerMono-web.woff2 gpu-sales.html gpu-sales-data.js youtube-cli-uploader-demo.cast)
+# Top-level files that stay off the server: build inputs, the GPU scraper's raw data, and the desktop font.
+private_files=(site-navigation.json site-theme.css gpu-sales-source.json ClankerMono-NF.ttf)
 if $default_deploy; then
     files=("${default_files[@]}")
 else
@@ -233,7 +235,7 @@ if $default_deploy; then
     # Name top-level files that a default deploy skips, so new pages are not silently left off the list.
     skipped_files=()
     while IFS= read -r file; do
-        case " ${default_files[*]} " in
+        case " ${default_files[*]} ${private_files[*]} " in
             *" $file "*) continue ;;
         esac
         case "$file" in
@@ -242,6 +244,6 @@ if $default_deploy; then
         skipped_files+=("$file")
     done < <(git ls-files --cached --others --exclude-standard | sort -u)
     if [ ${#skipped_files[@]} -gt 0 ]; then
-        echo "Not deployed (not in default_files): ${skipped_files[*]}"
+        echo "Not deployed (not in default_files or private_files): ${skipped_files[*]}"
     fi
 fi

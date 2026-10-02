@@ -4,7 +4,7 @@
 
 A default deploy also publishes the Sycophancy Bench v2 page from `/code/sycophant-public/v2/index.html` at `https://mihaicosma.com/sycophancy/`.
 
-A default deploy ends by naming the top-level files it skipped because they are not in `default_files` in `deploy.sh`, leaving out scripts, Markdown, and Apache config. Add a new public page to that list.
+A default deploy ends by naming the top-level files it skipped because they are in neither `default_files` nor `private_files` in `deploy.sh`, leaving out scripts, Markdown, and Apache config. Add a new public page to `default_files`, or a file that should stay off the server to `private_files`.
 
 Passing website-relative filenames publishes only those top-level files. `--force-shaarli` also runs the Shaarli deployment regardless of its input hash.
 

@@ -127,6 +127,10 @@ h1 {
     margin-bottom: 20px;
 }
 
+h2, h3, h4, h5, h6 {
+    font-weight: normal;
+}
+
 h2 {
     font-size: 0.95rem;
     text-transform: uppercase;
@@ -198,7 +202,7 @@ a:hover { border-bottom-color: #e8dcc0; }
     display: flex;
     justify-content: space-between;
     font-size: 0.65rem;
-    font-weight: 600;
+    font-weight: normal;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: #7a6e5e;

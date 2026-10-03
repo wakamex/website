@@ -475,6 +475,7 @@ a:hover { border-bottom-color: #e8dcc0; }
 .post h3 { color: #e0e0e0; font-size: 1rem; margin-top: 16px; margin-bottom: 6px; }
 .post blockquote { border-left: 2px solid #6b5a35; padding-left: 12px; color: #a69987; }
 .post [data-asciinema] { margin-bottom: 12px; }
+.post figure a { display: block; border-bottom: none; }
 .post figure img { display: block; width: 100%; height: auto; }
 .post figcaption { color: #7a6e5e; font-size: 0.8125rem; margin-top: 4px; }
 .post-figure-right { float: right; clear: right; width: 40%; max-width: 480px; margin: 4px 0 12px 20px; }

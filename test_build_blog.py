@@ -153,6 +153,61 @@ class BlogBuildTests(unittest.TestCase):
                 builder.BLOG_REPO = original_blog_repo
                 builder.BLOG_OUTPUT_DIR = original_blog_output_dir
 
+    def test_post_has_preview_tags_with_site_image(self):
+        date, slug, title, body = self.parse("First `x < y` & more.\n\nSecond paragraph.")
+        rendered = builder.render_post(date, slug, title, body)
+
+        self.assertIn('<meta property="og:title" content="Demo">', rendered)
+        self.assertIn(
+            '<meta property="og:description" content="First x &lt; y &amp; more.">',
+            rendered,
+        )
+        self.assertIn('<meta property="og:url" content="https://mihaicosma.com/blog/demo.html">', rendered)
+        self.assertIn('<meta property="og:image" content="https://mihaicosma.com/og-image.png">', rendered)
+        self.assertIn('<meta name="twitter:card" content="summary_large_image">', rendered)
+
+    def test_long_description_is_cut_at_a_word(self):
+        description = builder.describe("<p>" + "word " * 100 + "</p>")
+
+        self.assertLessEqual(len(description), builder.DESCRIPTION_LIMIT + 3)
+        self.assertTrue(description.endswith("word..."))
+
+    def test_committed_png_becomes_the_preview_image(self):
+        original_root = builder.ROOT
+        original_blog_repo = builder.BLOG_REPO
+        original_blog_output_dir = builder.BLOG_OUTPUT_DIR
+        with tempfile.TemporaryDirectory() as directory:
+            try:
+                builder.ROOT = Path(directory)
+                builder.BLOG_REPO = builder.ROOT / "source"
+                builder.BLOG_OUTPUT_DIR = builder.ROOT / "blog"
+                builder.BLOG_REPO.mkdir()
+                git = ["git", "-C", str(builder.BLOG_REPO)]
+                subprocess.run(["git", "init", "-q", str(builder.BLOG_REPO)], check=True)
+                (builder.BLOG_REPO / "2026-08-21-demo.md").write_text("# Demo\n\nText.\n")
+                png = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR" + (1200).to_bytes(4, "big") + (630).to_bytes(4, "big")
+                (builder.BLOG_REPO / "2026-08-21-demo.png").write_bytes(png)
+                subprocess.run([*git, "add", "."], check=True)
+                subprocess.run(
+                    [*git, "-c", "user.name=Test", "-c", "user.email=test@example.com", "commit", "-qm", "Initial"],
+                    check=True,
+                )
+                builder.BLOG_OUTPUT_DIR.mkdir()
+                (builder.BLOG_OUTPUT_DIR / "stale.png").write_bytes(b"stale")
+
+                with mock.patch("builtins.print"):
+                    builder.main()
+
+                rendered = (builder.BLOG_OUTPUT_DIR / "demo.html").read_text()
+                self.assertEqual(png, (builder.BLOG_OUTPUT_DIR / "demo.png").read_bytes())
+                self.assertIn('<meta property="og:image" content="https://mihaicosma.com/blog/demo.png">', rendered)
+                self.assertIn('<meta property="og:image:height" content="630">', rendered)
+                self.assertFalse((builder.BLOG_OUTPUT_DIR / "stale.png").exists())
+            finally:
+                builder.ROOT = original_root
+                builder.BLOG_REPO = original_blog_repo
+                builder.BLOG_OUTPUT_DIR = original_blog_output_dir
+
 
 if __name__ == "__main__":
     unittest.main()

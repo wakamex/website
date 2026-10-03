@@ -86,9 +86,11 @@ for file in "${files[@]}"; do
     cp -p -- "$file" "$deploy_stage/${file##*/}"
 done
 
-# Blog HTML: only include when running the default deploy (no args).
+# Blog HTML and preview images: only include when running the default deploy (no args).
 if $default_deploy; then
     blog_files=(blog/*.html)
+    blog_images=(blog/*.png)
+    [ -e "${blog_images[0]}" ] && blog_files+=("${blog_images[@]}")
     if [ -e "${blog_files[0]}" ]; then
         mkdir "$deploy_stage/blog"
         cp -p -- "${blog_files[@]}" "$deploy_stage/blog/"

@@ -185,6 +185,8 @@ a:hover { border-bottom-color: #e8dcc0; }
 /* ── Meters (toolcore-refined) ── */
 .meters-link {
     float: right;
+    /* Sit 12px below the header rule and 12px from the page edge, inside the body's 20px/24px padding. */
+    margin: -8px -12px 0 0;
     border: none;
     text-decoration: none;
     color: inherit;

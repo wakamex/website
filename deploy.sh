@@ -63,7 +63,7 @@ if ! $inquisition_only; then
 fi
 
 # Top-level files: default set, or whatever the user passed.
-default_files=(.htaccess index.html autoresearch.html projects.html style.css resume.html status.html blog.html og-image.png meters.js site-nav.js ClankerMono-web.woff2 gpu-sales.html gpu-sales-data.js youtube-cli-uploader-demo.cast)
+default_files=(.htaccess index.html autoresearch.html projects.html style.css resume.html status.html blog.html og-image.png meters.js site-nav.js ClankerMono-web.woff2 gpu-sales.html gpu-sales-data.js burn-widgets.html youtube-cli-uploader-demo.cast)
 # Top-level files that stay off the server: build inputs, the GPU scraper's raw data, and the desktop font.
 private_files=(site-navigation.json site-theme.css gpu-sales-source.json ClankerMono-NF.ttf)
 if $default_deploy; then

@@ -242,7 +242,22 @@ a:hover { border-bottom-color: #e8dcc0; }
     display: inline-block;
 }
 
-.meter-fill { height: 100%; display: block; }
+.meter-center {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    border-left: 1px solid #3d3428;
+}
+.meter-bubble {
+    position: absolute;
+    top: 3px;
+    width: 12px;
+    height: 6px;
+    margin-left: -6px;
+    border-radius: 3px;
+}
+.meters.stale { opacity: 0.45; }
 .meter-plan {
     position: absolute;
     top: 0;
@@ -257,9 +272,9 @@ a:hover { border-bottom-color: #e8dcc0; }
     letter-spacing: 0.04em;
     pointer-events: none;
 }
-.meter-fill.ok { background: #6b8f5e; }
-.meter-fill.warn { background: #c4862c; }
-.meter-fill.over { background: #b84a3a; }
+.meter-bubble.ok { background: #6b8f5e; }
+.meter-bubble.warn { background: #c4862c; }
+.meter-bubble.over { background: #b84a3a; }
 
 .meter-mult {
     width: 28px;

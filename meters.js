@@ -6,7 +6,8 @@
     }
 
     function calcMult(pct, resetsAt, periodHours) {
-        if (!resetsAt || !pct) return null;
+        if (!pct) return 0;
+        if (!resetsAt) return null;
         var remaining = (new Date(resetsAt) - new Date()) / 3600000;
         if (remaining <= 0) return null;
         var timeLeft = (remaining / periodHours) * 100;
@@ -15,15 +16,28 @@
         return timeLeft / budgetLeft;
     }
 
-    function meter(label, pct, mult, plan) {
+    // Spirit-level position: 1x is the centre line, linear from 0x on the left, logarithmic out to 20x on the right.
+    var MAX_MULT = 20;
+    var STALE_MS = 3 * 3600000;
+    function levelPosition(mult) {
+        if (mult <= 1) return mult / 2;
+        return 0.5 + Math.min(Math.log(mult) / Math.log(MAX_MULT), 1) / 2;
+    }
+
+    function multText(mult) {
+        if (mult > MAX_MULT) return '>' + MAX_MULT + 'x';
+        return mult >= 10 ? Math.round(mult) + 'x' : mult.toFixed(1) + 'x';
+    }
+
+    function meter(label, mult, note) {
         var cls = mult !== null ? multClass(mult) : 'ok';
-        var fillW = Math.min(pct, 100);
-        var multStr = mult === null ? '' : (mult >= 10 ? '>10x' : mult.toFixed(1) + 'x');
-        var planStr = plan || '';
+        var bubble = mult === null ? '' :
+            '<span class="meter-bubble ' + cls + '" style="left:calc(6px + (100% - 12px) * ' + levelPosition(mult) + ')"></span>';
         return '<span class="meter">' +
             '<span class="meter-name">' + label + '</span>' +
-            '<span class="meter-bar"><span class="meter-fill ' + cls + '" style="width:' + fillW + '%"></span><span class="meter-plan">' + planStr + '</span></span>' +
-            '<span class="meter-mult ' + cls + '">' + multStr + '</span>' +
+            '<span class="meter-bar"><span class="meter-center"></span>' + bubble +
+            (note ? '<span class="meter-plan">' + note + '</span>' : '') + '</span>' +
+            '<span class="meter-mult ' + cls + '">' + (mult === null ? '' : multText(mult)) + '</span>' +
             '</span>';
     }
 
@@ -76,21 +90,19 @@
         var html = '<div class="meters-title"><span>Weekly</span><span>Burn</span></div><div class="meters-body">';
 
         if (claudeUnavailable(d.claude)) {
-            html += meter('claude', 0, null, 'unavailable');
+            html += meter('claude', null, 'unavailable');
         } else if (d.claude && d.claude['7d']) {
             var c = d.claude;
-            var m = calcMult(c['7d'].pct, c['7d'].resets_at, 168);
-            html += meter('claude', c['7d'].pct, m, c.plan);
+            html += meter('claude', calcMult(c['7d'].pct, c['7d'].resets_at, 168));
         }
 
         if (d.codex && codexWeeklyBucket(d.codex)) {
             var x = d.codex;
             var b = codexWeeklyBucket(x);
             var periodHours = codexWindowSeconds(b, 604800) / 3600;
-            var m = calcMult(b.pct, b.resets_at, periodHours);
-            html += meter('codex', b.pct, m, x.plan);
+            html += meter('codex', calcMult(b.pct, b.resets_at, periodHours));
         } else {
-            html += meter('codex', 0, null);
+            html += meter('codex', null);
         }
 
         if (d.agy) {
@@ -98,12 +110,22 @@
             var b = agyWeeklyBucket(a);
             if (b && b.remaining_pct !== null && b.remaining_pct !== undefined) {
                 var pct = Math.max(0, 100 - b.remaining_pct);
-                var m = calcMult(pct, b.reset_time, 168);
-                html += meter('agy', pct, m, a.plan);
+                html += meter('agy', calcMult(pct, b.reset_time, 168));
             }
         }
 
         html += '</div>';
         el.innerHTML = html;
+
+        // Dim the widget when the publisher has stopped delivering fresh data.
+        var newest = 0;
+        ['claude', 'codex', 'agy'].forEach(function(key) {
+            var updated = d[key] && Date.parse(d[key].updated_at);
+            if (updated > newest) newest = updated;
+        });
+        if (newest && new Date() - newest > STALE_MS) {
+            el.classList.add('stale');
+            el.title = 'Usage data last updated ' + new Date(newest).toLocaleString();
+        }
     }).catch(function() {});
 })();

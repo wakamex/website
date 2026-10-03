@@ -477,7 +477,7 @@ a:hover { border-bottom-color: #e8dcc0; }
 .post [data-asciinema] { margin-bottom: 12px; }
 .post table { border-collapse: collapse; margin-bottom: 12px; }
 .post th, .post td { border: 1px solid #3d3428; padding: 4px 10px; text-align: left; }
-.post th { color: #e0e0e0; background: rgba(255, 255, 255, 0.03); font-weight: normal; }
+.post th { color: #a69987; background: rgba(255, 255, 255, 0.03); font-weight: normal; font-size: 0.88rem; letter-spacing: 0.04em; }
 
 /* Autoresearch */
 .featured-research { margin-top: 4px; }

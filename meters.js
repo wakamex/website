@@ -16,7 +16,7 @@
         return timeLeft / budgetLeft;
     }
 
-    // Spirit-level position: 1x is the centre line, linear from 0x on the left, logarithmic out to 20x on the right.
+    // Fill level: 1x fills to the centre tick, linear from 0x, logarithmic out to 20x at the right end.
     var MAX_MULT = 20;
     var STALE_MS = 3 * 3600000;
     function levelPosition(mult) {
@@ -38,13 +38,14 @@
     };
     var NAMES = { claude: 'Claude', codex: 'Codex', agy: 'Antigravity', zcode: 'Z.ai' };
 
-    function meter(key, mult, note) {
+    function meter(key, mult, plan, note) {
         var cls = mult !== null ? multClass(mult) : 'ok';
-        var bubble = mult === null ? '' :
-            '<span class="meter-bubble ' + cls + '" style="left:calc(6px + (100% - 12px) * ' + levelPosition(mult) + ')"></span>';
+        var fill = mult === null ? '' :
+            '<span class="meter-fill ' + cls + '" style="width:' + (levelPosition(mult) * 100).toFixed(1) + '%"></span>';
         return '<span class="meter' + (note ? ' muted' : '') + '" title="' + NAMES[key] + (note ? ': ' + note : '') + '">' +
             '<span class="meter-icon ' + key + '" role="img" aria-label="' + NAMES[key] + '">' + ICONS[key] + '</span>' +
-            '<span class="meter-bar"><span class="meter-center"></span>' + bubble + '</span>' +
+            '<span class="meter-bar"><span class="meter-center"></span>' + fill +
+            '<span class="meter-plan">' + (note === 'unavailable' ? 'unavailable' : plan || '') + '</span></span>' +
             '<span class="meter-mult ' + cls + '">' + (mult === null ? '–' : multText(mult)) + '</span>' +
             '</span>';
     }
@@ -58,7 +59,7 @@
 
     function reading(key, data, mult) {
         var note = staleNote(data);
-        return note ? meter(key, null, note) : meter(key, mult);
+        return note ? meter(key, null, data.plan, note) : meter(key, mult, data.plan);
     }
 
     function agyWeeklyBucket(data) {
@@ -118,7 +119,7 @@
         var html = '<div class="meters-title"><span>Weekly</span><span>Burn</span></div><div class="meters-body">';
 
         if (claudeUnavailable(d.claude)) {
-            html += meter('claude', null, 'unavailable');
+            html += meter('claude', null, d.claude.plan, 'unavailable');
         } else if (d.claude && d.claude['7d']) {
             var c = d.claude;
             html += reading('claude', c, calcMult(c['7d'].pct, c['7d'].resets_at, 168));

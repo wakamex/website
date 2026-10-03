@@ -1,9 +1,12 @@
+import io
 import os
 import subprocess
 import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
+
+from PIL import Image
 
 import build_blog as builder
 
@@ -116,7 +119,7 @@ class BlogBuildTests(unittest.TestCase):
                 with mock.patch("builtins.print") as print_mock:
                     builder.main()
                 print_mock.assert_called_once_with(
-                    "checked 1 post(s), wrote 3 file(s); skipped non-post Markdown: AGENTS.md"
+                    "checked 1 post(s), wrote 4 file(s); skipped non-post Markdown: AGENTS.md"
                 )
 
                 index = (builder.BLOG_OUTPUT_DIR / "index.html").read_text()
@@ -153,7 +156,7 @@ class BlogBuildTests(unittest.TestCase):
                 builder.BLOG_REPO = original_blog_repo
                 builder.BLOG_OUTPUT_DIR = original_blog_output_dir
 
-    def test_post_has_preview_tags_with_site_image(self):
+    def test_post_preview_tags_point_at_its_card(self):
         date, slug, title, body = self.parse("First `x < y` & more.\n\nSecond paragraph.")
         rendered = builder.render_post(date, slug, title, body)
 
@@ -163,8 +166,18 @@ class BlogBuildTests(unittest.TestCase):
             rendered,
         )
         self.assertIn('<meta property="og:url" content="https://mihaicosma.com/blog/demo.html">', rendered)
-        self.assertIn('<meta property="og:image" content="https://mihaicosma.com/og-image.png">', rendered)
+        self.assertIn('<meta property="og:image" content="https://mihaicosma.com/blog/demo.png">', rendered)
+        self.assertIn('<meta property="og:image:width" content="1200">', rendered)
         self.assertIn('<meta name="twitter:card" content="summary_large_image">', rendered)
+
+    def test_card_line_sets_the_subtitle_and_is_not_rendered(self):
+        text = "# Demo\n\n<!-- card: It started at 24 frames a second -->\n\nBody text.\n"
+        _, _, _, body = builder.parse_post_text("2026-08-21-demo.md", text)
+
+        self.assertEqual("It started at 24 frames a second", builder.card_subtitle(text))
+        self.assertNotIn("card:", body)
+        self.assertIn("<p>Body text.</p>", body)
+        self.assertIsNone(builder.card_subtitle("# Demo\n\nBody text.\n"))
 
     def test_long_description_is_cut_at_a_word(self):
         description = builder.describe("<p>" + "word " * 100 + "</p>")
@@ -172,7 +185,7 @@ class BlogBuildTests(unittest.TestCase):
         self.assertLessEqual(len(description), builder.DESCRIPTION_LIMIT + 3)
         self.assertTrue(description.endswith("word..."))
 
-    def test_committed_pngs_are_published_and_the_post_named_one_is_the_preview(self):
+    def test_every_post_gets_a_card_and_the_post_named_png_is_its_background(self):
         original_root = builder.ROOT
         original_blog_repo = builder.BLOG_REPO
         original_blog_output_dir = builder.BLOG_OUTPUT_DIR
@@ -185,8 +198,10 @@ class BlogBuildTests(unittest.TestCase):
                 git = ["git", "-C", str(builder.BLOG_REPO)]
                 subprocess.run(["git", "init", "-q", str(builder.BLOG_REPO)], check=True)
                 (builder.BLOG_REPO / "2026-08-21-demo.md").write_text("# Demo\n\nText.\n")
-                png = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR" + (1200).to_bytes(4, "big") + (630).to_bytes(4, "big")
-                (builder.BLOG_REPO / "2026-08-21-demo.png").write_bytes(png)
+                background = io.BytesIO()
+                Image.new("RGB", (640, 360), (200, 0, 120)).save(background, format="PNG")
+                (builder.BLOG_REPO / "2026-08-21-demo.png").write_bytes(background.getvalue())
+                (builder.BLOG_REPO / "2026-08-22-plain.md").write_text("# Plain\n\nText.\n")
                 (builder.BLOG_REPO / "2026-08-21-demo-figure.png").write_bytes(b"figure")
                 subprocess.run([*git, "add", "."], check=True)
                 subprocess.run(
@@ -200,7 +215,13 @@ class BlogBuildTests(unittest.TestCase):
                     builder.main()
 
                 rendered = (builder.BLOG_OUTPUT_DIR / "demo.html").read_text()
-                self.assertEqual(png, (builder.BLOG_OUTPUT_DIR / "demo.png").read_bytes())
+                card = Image.open(builder.BLOG_OUTPUT_DIR / "demo.png")
+                self.assertEqual((1200, 630), card.size)
+                # The background shows on the right, past the fade behind the text.
+                self.assertGreater(card.convert("RGB").getpixel((1190, 315))[0], 100)
+                plain = Image.open(builder.BLOG_OUTPUT_DIR / "plain.png").convert("RGB")
+                self.assertEqual((1200, 630), plain.size)
+                self.assertEqual((4, 5, 6), plain.getpixel((1190, 315)))
                 self.assertIn('<meta property="og:image" content="https://mihaicosma.com/blog/demo.png">', rendered)
                 self.assertIn('<meta property="og:image:height" content="630">', rendered)
                 self.assertEqual(b"figure", (builder.BLOG_OUTPUT_DIR / "demo-figure.png").read_bytes())

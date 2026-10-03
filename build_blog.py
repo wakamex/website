@@ -2,12 +2,12 @@
 """Build blog/*.md -> blog/*.html and regenerate the blog index."""
 import html
 import re
-import struct
 import subprocess
 from pathlib import Path
 
 import markdown
 
+from blog_card import HEIGHT as CARD_HEIGHT, WIDTH as CARD_WIDTH, render_card
 from site_shared import render_site_header, write_if_changed
 
 ROOT = Path(__file__).parent
@@ -15,7 +15,8 @@ BLOG_REPO = Path("/code/blog")
 BLOG_OUTPUT_DIR = ROOT / "blog"
 FILENAME_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})-(.+)\.md$")
 SITE_URL = "https://mihaicosma.com"
-SITE_IMAGE = (f"{SITE_URL}/og-image.png", 1200, 630)
+# An optional line directly under a post's title sets its preview card subtitle and is not rendered.
+CARD_LINE_RE = re.compile(r"\A<!--\s*card:\s*(.*?)\s*-->[ \t]*(?:\n|\Z)")
 DESCRIPTION_LIMIT = 200
 ASCIINEMA_SHORTCODE_RE = re.compile(
     r'^[ \t]*\{\{\s*asciinema\("([^"\r\n]+)"\)\s*\}\}[ \t]*$', re.MULTILINE
@@ -112,15 +113,23 @@ def describe(body_html):
     return text
 
 
-def png_size(data: bytes):
-    if data[:8] != b"\x89PNG\r\n\x1a\n" or data[12:16] != b"IHDR":
-        raise ValueError("not a PNG")
-    return struct.unpack(">II", data[16:24])
+def write_bytes_if_changed(path: Path, data: bytes) -> bool:
+    if path.exists() and path.read_bytes() == data:
+        return False
+    path.write_bytes(data)
+    return True
+
+
+def card_subtitle(text):
+    """The card subtitle from an optional '<!-- card: ... -->' line directly under the title."""
+    title_match = re.match(r"#\s+(.+)", text)
+    match = title_match and CARD_LINE_RE.match(text[title_match.end():].lstrip("\n"))
+    return match.group(1) if match else None
 
 
 def render_social_head(slug, title, body, image=None):
     """Open Graph and Twitter card tags, so shared links show a preview. image is (url, width, height)."""
-    url, width, height = image or SITE_IMAGE
+    url, width, height = image or (f"{SITE_URL}/blog/{slug}.png", CARD_WIDTH, CARD_HEIGHT)
     tags = [
         ("property", "og:type", "article"),
         ("property", "og:title", title),
@@ -146,7 +155,7 @@ def parse_post_text(filename: str, text: str):
     if not title_match:
         raise ValueError(f"{filename}: first line must be '# Title'")
     title = title_match.group(1).strip()
-    body_md = text[title_match.end():].lstrip("\n")
+    body_md = CARD_LINE_RE.sub("", text[title_match.end():].lstrip("\n"), count=1).lstrip("\n")
     body_md = ASCIINEMA_SHORTCODE_RE.sub(
         lambda match: f'<div data-asciinema="{html.escape(match.group(1), quote=True)}"></div>',
         body_md,
@@ -218,20 +227,21 @@ def main():
             continue
         date_str, slug, title, body = parse_post_text(filename, text)
         # A post's images are committed PNGs named after it, published without the date:
-        # 2026-10-02-slug-plasma.png becomes /blog/slug-plasma.png. 2026-10-02-slug.png is also its preview.
-        image = None
+        # 2026-10-02-slug-plasma.png becomes /blog/slug-plasma.png. 2026-10-02-slug.png is instead the
+        # background of the post's generated preview card, published as /blog/slug.png.
+        background = None
         stem = filename[:-3]
         for name in sorted(n for n in names if n.startswith(stem) and n.endswith(".png") and "/" not in n):
             data = subprocess.check_output(["git", "-C", str(BLOG_REPO), "show", f"HEAD:{name}"])
-            published = slug + name[len(stem):]
-            image_output = BLOG_OUTPUT_DIR / published
-            if not image_output.exists() or image_output.read_bytes() != data:
-                image_output.write_bytes(data)
-                files_written += 1
-            expected_outputs.add(image_output)
             if name == stem + ".png":
-                image = (f"{SITE_URL}/blog/{published}", *png_size(data))
-        rendered = render_post(date_str, slug, title, body, image)
+                background = data
+                continue
+            files_written += write_bytes_if_changed(BLOG_OUTPUT_DIR / (slug + name[len(stem):]), data)
+            expected_outputs.add(BLOG_OUTPUT_DIR / (slug + name[len(stem):]))
+        card_output = BLOG_OUTPUT_DIR / f"{slug}.png"
+        files_written += write_bytes_if_changed(card_output, render_card(title, card_subtitle(text), background))
+        expected_outputs.add(card_output)
+        rendered = render_post(date_str, slug, title, body)
         output = BLOG_OUTPUT_DIR / f"{slug}.html"
         files_written += write_if_changed(output, rendered)
         expected_outputs.add(output)

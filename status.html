@@ -46,9 +46,11 @@
         }
         .titlebar a:hover { color: #b6aa99; }
 
+        [hidden] { display: none !important; }
+
         .layout {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 8px;
         }
 
@@ -125,7 +127,7 @@
             color: #7a6e5e;
             margin-top: 8px;
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 8px;
         }
         .footer-cell {
@@ -181,12 +183,23 @@
                 <span class="dim">no data</span>
             </div>
         </div>
+
+        <div class="panel" id="zcode-panel" hidden>
+            <div class="panel-title">
+                <span>Z.ai</span>
+                <span id="zcode-plan" class="dim">—</span>
+            </div>
+            <div class="panel-body" id="zcode-body">
+                <span class="dim">no data</span>
+            </div>
+        </div>
     </div>
 
     <div class="footer-row">
         <span class="footer-cell"><a href="https://github.com/wakamex/ccusage">ccusage</a><span id="claude-updated"></span></span>
         <span class="footer-cell"><a href="https://github.com/wakamex/codex-cli-usage">codex-cli-usage</a><span id="codex-updated"></span></span>
         <span class="footer-cell"><a href="https://github.com/wakamex/agy-usage">agy-usage</a><span id="agy-updated"></span></span>
+        <span class="footer-cell" id="zcode-footer" hidden><a href="https://github.com/wakamex/zcode-cli-usage">zcode-cli-usage</a><span id="zcode-updated"></span></span>
     </div>
 
     <script>
@@ -396,6 +409,25 @@
                 }
                 document.getElementById('agy-body').innerHTML = html || '<span class="dim">no quota</span>';
                 document.getElementById('agy-updated').textContent = 'updated ' + fmtAge(a.updated_at);
+            }
+
+            // Z.ai is shown only while a Coding Plan is active; zcode-cli-usage records an unsubscribed account as no_plan.
+            if (d.zcode && d.zcode.status !== 'no_plan') {
+                var z = d.zcode;
+                document.getElementById('zcode-plan').textContent = z.plan || '—';
+                var html = '';
+                (z.limits || []).forEach(function(limit) {
+                    if (limit.pct === null || limit.pct === undefined) return;
+                    var periodHours = limit.unit === 3 ? limit.number : limit.unit === 6 ? limit.number * 168 : null;
+                    var label = limit.unit === 3 ? 'Session (' + limit.number + 'h)' :
+                        limit.unit === 6 && limit.number === 1 ? 'Week (7d)' : limit.type;
+                    var m = periodHours ? calcMult(limit.pct, limit.resets_at, periodHours) : null;
+                    html += meterRow(label, limit.pct, m, limit.resets_at, periodHours);
+                });
+                document.getElementById('zcode-body').innerHTML = html || '<span class="dim">no quota</span>';
+                document.getElementById('zcode-updated').textContent = 'updated ' + fmtAge(z.updated_at);
+                document.getElementById('zcode-panel').hidden = false;
+                document.getElementById('zcode-footer').hidden = false;
             }
         }).catch(function() {
             document.getElementById('claude-body').innerHTML = '<span class="dim">offline</span>';

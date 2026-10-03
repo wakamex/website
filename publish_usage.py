@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -21,6 +22,7 @@ CACHES = {
     "claude": Path.home() / ".claude" / "usage-limits.json",
     "codex": Path.home() / ".codex" / "usage-limits.json",
     "agy": Path.home() / ".gemini" / "antigravity-cli" / "usage-limits.json",
+    "zcode": Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "zcode-cli-usage" / "usage.json",
 }
 # Antigravity's cache also records command history, workspaces and the cloud project; publish only quota fields.
 AGY_FIELDS = {"plan", "source", "updated_at", "status", "unavailable", "quota_summary", "quota_summary_error"}

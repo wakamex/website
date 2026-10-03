@@ -172,7 +172,7 @@ class BlogBuildTests(unittest.TestCase):
         self.assertLessEqual(len(description), builder.DESCRIPTION_LIMIT + 3)
         self.assertTrue(description.endswith("word..."))
 
-    def test_committed_png_becomes_the_preview_image(self):
+    def test_committed_pngs_are_published_and_the_post_named_one_is_the_preview(self):
         original_root = builder.ROOT
         original_blog_repo = builder.BLOG_REPO
         original_blog_output_dir = builder.BLOG_OUTPUT_DIR
@@ -187,6 +187,7 @@ class BlogBuildTests(unittest.TestCase):
                 (builder.BLOG_REPO / "2026-08-21-demo.md").write_text("# Demo\n\nText.\n")
                 png = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR" + (1200).to_bytes(4, "big") + (630).to_bytes(4, "big")
                 (builder.BLOG_REPO / "2026-08-21-demo.png").write_bytes(png)
+                (builder.BLOG_REPO / "2026-08-21-demo-figure.png").write_bytes(b"figure")
                 subprocess.run([*git, "add", "."], check=True)
                 subprocess.run(
                     [*git, "-c", "user.name=Test", "-c", "user.email=test@example.com", "commit", "-qm", "Initial"],
@@ -202,6 +203,7 @@ class BlogBuildTests(unittest.TestCase):
                 self.assertEqual(png, (builder.BLOG_OUTPUT_DIR / "demo.png").read_bytes())
                 self.assertIn('<meta property="og:image" content="https://mihaicosma.com/blog/demo.png">', rendered)
                 self.assertIn('<meta property="og:image:height" content="630">', rendered)
+                self.assertEqual(b"figure", (builder.BLOG_OUTPUT_DIR / "demo-figure.png").read_bytes())
                 self.assertFalse((builder.BLOG_OUTPUT_DIR / "stale.png").exists())
             finally:
                 builder.ROOT = original_root

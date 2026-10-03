@@ -217,17 +217,20 @@ def main():
             skipped.append(filename)
             continue
         date_str, slug, title, body = parse_post_text(filename, text)
-        # A post's preview image is a committed PNG with the post's own name, such as 2026-10-02-slug.png.
+        # A post's images are committed PNGs named after it, published without the date:
+        # 2026-10-02-slug-plasma.png becomes /blog/slug-plasma.png. 2026-10-02-slug.png is also its preview.
         image = None
-        image_name = filename[:-3] + ".png"
-        if image_name in names:
-            data = subprocess.check_output(["git", "-C", str(BLOG_REPO), "show", f"HEAD:{image_name}"])
-            image_output = BLOG_OUTPUT_DIR / f"{slug}.png"
+        stem = filename[:-3]
+        for name in sorted(n for n in names if n.startswith(stem) and n.endswith(".png") and "/" not in n):
+            data = subprocess.check_output(["git", "-C", str(BLOG_REPO), "show", f"HEAD:{name}"])
+            published = slug + name[len(stem):]
+            image_output = BLOG_OUTPUT_DIR / published
             if not image_output.exists() or image_output.read_bytes() != data:
                 image_output.write_bytes(data)
                 files_written += 1
             expected_outputs.add(image_output)
-            image = (f"{SITE_URL}/blog/{slug}.png", *png_size(data))
+            if name == stem + ".png":
+                image = (f"{SITE_URL}/blog/{published}", *png_size(data))
         rendered = render_post(date_str, slug, title, body, image)
         output = BLOG_OUTPUT_DIR / f"{slug}.html"
         files_written += write_if_changed(output, rendered)

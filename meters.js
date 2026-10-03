@@ -116,7 +116,7 @@
     if (!el) return;
 
     fetch('/usage.json').then(function(r) { return r.json(); }).then(function(d) {
-        var html = '<div class="meters-title"><span>Weekly</span><span>Burn</span></div><div class="meters-body">';
+        var html = '<div class="meters-title">Token burn</div><div class="meters-body">';
 
         if (claudeUnavailable(d.claude)) {
             html += meter('claude', null, d.claude.plan, 'unavailable');

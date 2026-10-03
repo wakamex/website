@@ -185,8 +185,11 @@ a:hover { border-bottom-color: #e8dcc0; }
 /* ── Meters (toolcore-refined) ── */
 .meters-link {
     float: right;
-    /* Sit 12px below the header rule and 12px from the page edge, inside the body's 20px/24px padding. */
-    margin: -8px -12px 0 0;
+    /* Sit over the header, 12px from the top and right of the page: the float starts below the header and
+       its 20px bottom margin, inside the body's 24px side padding. Text below still wraps around it. */
+    position: relative;
+    z-index: 101;
+    margin: calc(12px - 20px - var(--site-header-height)) -12px 0 0;
     border: none;
     text-decoration: none;
     color: inherit;
@@ -201,8 +204,7 @@ a:hover { border-bottom-color: #e8dcc0; }
 }
 
 .meters-title {
-    display: flex;
-    justify-content: space-between;
+    text-align: center;
     font-size: 0.65rem;
     font-weight: normal;
     text-transform: uppercase;

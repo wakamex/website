@@ -113,6 +113,11 @@ def describe(body_html):
     return text
 
 
+def reading_minutes(body_html):
+    words = len(html.unescape(re.sub(r"<[^>]+>", " ", body_html)).split())
+    return max(1, round(words / 230))
+
+
 def write_bytes_if_changed(path: Path, data: bytes) -> bool:
     if path.exists() and path.read_bytes() == data:
         return False
@@ -227,19 +232,17 @@ def main():
             continue
         date_str, slug, title, body = parse_post_text(filename, text)
         # A post's images are committed PNGs named after it, published without the date:
-        # 2026-10-02-slug-plasma.png becomes /blog/slug-plasma.png. 2026-10-02-slug.png is instead the
-        # background of the post's generated preview card, published as /blog/slug.png.
-        background = None
+        # 2026-10-02-slug-plasma.png becomes /blog/slug-plasma.png. /blog/slug.png is the generated preview card.
         stem = filename[:-3]
-        for name in sorted(n for n in names if n.startswith(stem) and n.endswith(".png") and "/" not in n):
+        if stem + ".png" in names:
+            raise ValueError(f"{stem}.png would replace the post's generated preview card; give it a suffix such as {stem}-figure.png")
+        for name in sorted(n for n in names if n.startswith(stem + "-") and n.endswith(".png") and "/" not in n):
             data = subprocess.check_output(["git", "-C", str(BLOG_REPO), "show", f"HEAD:{name}"])
-            if name == stem + ".png":
-                background = data
-                continue
             files_written += write_bytes_if_changed(BLOG_OUTPUT_DIR / (slug + name[len(stem):]), data)
             expected_outputs.add(BLOG_OUTPUT_DIR / (slug + name[len(stem):]))
         card_output = BLOG_OUTPUT_DIR / f"{slug}.png"
-        files_written += write_bytes_if_changed(card_output, render_card(title, card_subtitle(text), background))
+        card = render_card(title, card_subtitle(text), f"{date_str} · {reading_minutes(body)} min read")
+        files_written += write_bytes_if_changed(card_output, card)
         expected_outputs.add(card_output)
         rendered = render_post(date_str, slug, title, body)
         output = BLOG_OUTPUT_DIR / f"{slug}.html"

@@ -185,7 +185,7 @@ class BlogBuildTests(unittest.TestCase):
         self.assertLessEqual(len(description), builder.DESCRIPTION_LIMIT + 3)
         self.assertTrue(description.endswith("word..."))
 
-    def test_every_post_gets_a_card_and_the_post_named_png_is_its_background(self):
+    def test_every_post_gets_a_card_and_suffixed_pngs_are_published(self):
         original_root = builder.ROOT
         original_blog_repo = builder.BLOG_REPO
         original_blog_output_dir = builder.BLOG_OUTPUT_DIR
@@ -198,9 +198,6 @@ class BlogBuildTests(unittest.TestCase):
                 git = ["git", "-C", str(builder.BLOG_REPO)]
                 subprocess.run(["git", "init", "-q", str(builder.BLOG_REPO)], check=True)
                 (builder.BLOG_REPO / "2026-08-21-demo.md").write_text("# Demo\n\nText.\n")
-                background = io.BytesIO()
-                Image.new("RGB", (640, 360), (200, 0, 120)).save(background, format="PNG")
-                (builder.BLOG_REPO / "2026-08-21-demo.png").write_bytes(background.getvalue())
                 (builder.BLOG_REPO / "2026-08-22-plain.md").write_text("# Plain\n\nText.\n")
                 (builder.BLOG_REPO / "2026-08-21-demo-figure.png").write_bytes(b"figure")
                 subprocess.run([*git, "add", "."], check=True)
@@ -215,13 +212,11 @@ class BlogBuildTests(unittest.TestCase):
                     builder.main()
 
                 rendered = (builder.BLOG_OUTPUT_DIR / "demo.html").read_text()
-                card = Image.open(builder.BLOG_OUTPUT_DIR / "demo.png")
+                card = Image.open(builder.BLOG_OUTPUT_DIR / "demo.png").convert("RGB")
                 self.assertEqual((1200, 630), card.size)
-                # The background shows on the right, past the fade behind the text.
-                self.assertGreater(card.convert("RGB").getpixel((1190, 315))[0], 100)
-                plain = Image.open(builder.BLOG_OUTPUT_DIR / "plain.png").convert("RGB")
-                self.assertEqual((1200, 630), plain.size)
-                self.assertEqual((4, 5, 6), plain.getpixel((1190, 315)))
+                self.assertEqual((4, 5, 6), card.getpixel((1190, 315)))
+                self.assertEqual((255, 152, 0), card.getpixel((600, 627)))
+                self.assertTrue((builder.BLOG_OUTPUT_DIR / "plain.png").exists())
                 self.assertIn('<meta property="og:image" content="https://mihaicosma.com/blog/demo.png">', rendered)
                 self.assertIn('<meta property="og:image:height" content="630">', rendered)
                 self.assertEqual(b"figure", (builder.BLOG_OUTPUT_DIR / "demo-figure.png").read_bytes())
@@ -230,6 +225,10 @@ class BlogBuildTests(unittest.TestCase):
                 builder.ROOT = original_root
                 builder.BLOG_REPO = original_blog_repo
                 builder.BLOG_OUTPUT_DIR = original_blog_output_dir
+
+    def test_reading_time_rounds_to_whole_minutes(self):
+        self.assertEqual(1, builder.reading_minutes("<p>short</p>"))
+        self.assertEqual(3, builder.reading_minutes("<p>" + "word " * 700 + "</p>"))
 
 
 if __name__ == "__main__":
